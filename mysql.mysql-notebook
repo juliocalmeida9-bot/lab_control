@@ -1,0 +1,267 @@
+{
+    "type": "MySQLNotebook",
+    "version": "1.0",
+    "caption": "DB Notebook",
+    "content": "\\about\n-- =====================================================\n-- CRIAÇÃO DO BANCO DE DADOS\n-- =====================================================\n\nCREATE DATABASE controle_laboratorio;\nUSE controle_laboratorio;\n\n-- =====================================================\n-- TABELA SALA\n-- 1 Sala -> N Equipamentos\n-- =====================================================\n\nCREATE TABLE sala (\n    id_sala INT AUTO_INCREMENT PRIMARY KEY,\n    nome VARCHAR(50) NOT NULL,\n    bloco VARCHAR(30),\n    capacidade INT,\n    descricao TEXT\n) ENGINE=InnoDB;\n\n-- =====================================================\n-- TABELA TURMA\n-- 1 Turma -> N Alunos\n-- 1 Turma -> N Aulas\n-- =====================================================\n\nCREATE TABLE turma (\n    id_turma INT AUTO_INCREMENT PRIMARY KEY,\n    nome VARCHAR(50) NOT NULL,\n    curso VARCHAR(100),\n    semestre VARCHAR(20),\n    ano INT NOT NULL\n) ENGINE=InnoDB;\n\n-- =====================================================\n-- TABELA PROFESSOR\n-- =====================================================\n\nCREATE TABLE professor (\n    id_professor INT AUTO_INCREMENT PRIMARY KEY,\n    nome VARCHAR(100) NOT NULL,\n    email VARCHAR(100) UNIQUE,\n    telefone VARCHAR(20),\n    especialidade VARCHAR(100)\n) ENGINE=InnoDB;\n\n-- =====================================================\n-- TABELA AULA\n-- =====================================================\n\nCREATE TABLE aula (\n    id_aula INT AUTO_INCREMENT PRIMARY KEY,\n    tema VARCHAR(100) NOT NULL,\n    data DATE NOT NULL,\n    horario_inicio TIME NOT NULL,\n    horario_fim TIME NOT NULL,\n    id_turma INT NOT NULL,\n    id_sala INT NOT NULL,\n    FOREIGN KEY (id_turma) REFERENCES turma(id_turma)\n        ON DELETE CASCADE\n        ON UPDATE CASCADE,\n    FOREIGN KEY (id_sala) REFERENCES sala(id_sala)\n        ON DELETE RESTRICT\n        ON UPDATE CASCADE\n) ENGINE=InnoDB;\n\n-- =====================================================\n-- RELAÇÃO N:N PROFESSOR_AULA\n-- =====================================================\n\nCREATE TABLE professor_aula (\n    id_professor INT,\n    id_aula INT,\n    PRIMARY KEY (id_professor, id_aula),\n    FOREIGN KEY (id_professor) REFERENCES professor(id_professor)\n        ON DELETE CASCADE\n        ON UPDATE CASCADE,\n    FOREIGN KEY (id_aula) REFERENCES aula(id_aula)\n        ON DELETE CASCADE\n        ON UPDATE CASCADE\n) ENGINE=InnoDB;\n\n-- =====================================================\n-- TABELA ALUNO\n-- =====================================================\n\nCREATE TABLE aluno (\n    id_aluno INT AUTO_INCREMENT PRIMARY KEY,\n    nome VARCHAR(100) NOT NULL,\n    matricula VARCHAR(50) UNIQUE NOT NULL,\n    email VARCHAR(100),\n    id_turma INT NOT NULL,\n    FOREIGN KEY (id_turma) REFERENCES turma(id_turma)\n        ON DELETE CASCADE\n        ON UPDATE CASCADE\n) ENGINE=InnoDB;\n\n-- =====================================================\n-- TABELA EQUIPE\n-- =====================================================\n\nCREATE TABLE equipe (\n    id_equipe INT AUTO_INCREMENT PRIMARY KEY,\n    nome VARCHAR(50) NOT NULL,\n    id_turma INT NOT NULL,\n    FOREIGN KEY (id_turma) REFERENCES turma(id_turma)\n        ON DELETE CASCADE\n        ON UPDATE CASCADE\n) ENGINE=InnoDB;\n\n-- =====================================================\n-- RELAÇÃO N:N ALUNO_EQUIPE\n-- =====================================================\n\nCREATE TABLE aluno_equipe (\n    id_aluno INT,\n    id_equipe INT,\n    PRIMARY KEY (id_aluno, id_equipe),\n    FOREIGN KEY (id_aluno) REFERENCES aluno(id_aluno)\n        ON DELETE CASCADE\n        ON UPDATE CASCADE,\n    FOREIGN KEY (id_equipe) REFERENCES equipe(id_equipe)\n        ON DELETE CASCADE\n        ON UPDATE CASCADE\n) ENGINE=InnoDB;\n\n-- =====================================================\n-- RESPONSÁVEL DA EQUIPE (AUTENTICAÇÃO)\n-- =====================================================\n\nCREATE TABLE responsavel_equipe (\n    id_responsavel INT AUTO_INCREMENT PRIMARY KEY,\n    id_aluno INT UNIQUE NOT NULL,\n    id_equipe INT UNIQUE NOT NULL,\n    chave_hash VARCHAR(255) NOT NULL,\n    tentativas INT DEFAULT 0,\n    bloqueado BOOLEAN DEFAULT FALSE,\n    FOREIGN KEY (id_aluno) REFERENCES aluno(id_aluno)\n        ON DELETE CASCADE\n        ON UPDATE CASCADE,\n    FOREIGN KEY (id_equipe) REFERENCES equipe(id_equipe)\n        ON DELETE CASCADE\n        ON UPDATE CASCADE\n) ENGINE=InnoDB;\n\n-- =====================================================\n-- TABELA EQUIPAMENTO\n-- N Equipamentos -> 1 Sala\n-- =====================================================\n\nCREATE TABLE equipamento (\n    id_equipamento INT AUTO_INCREMENT PRIMARY KEY,\n    patrimonio VARCHAR(50) UNIQUE NOT NULL,\n    tipo ENUM('Notebook','Mouse','Carregador') NOT NULL,\n    status ENUM('Disponivel','Em Uso','Manutencao') DEFAULT 'Disponivel',\n    estado ENUM('Bom','Danificado') DEFAULT 'Bom',\n    id_sala INT NOT NULL,\n    FOREIGN KEY (id_sala) REFERENCES sala(id_sala)\n        ON DELETE RESTRICT\n        ON UPDATE CASCADE\n) ENGINE=InnoDB;\n\n-- =====================================================\n-- RELAÇÃO N:N EQUIPE_EQUIPAMENTO\n-- =====================================================\n\nCREATE TABLE equipe_equipamento (\n    id_equipe INT,\n    id_equipamento INT,\n    PRIMARY KEY (id_equipe, id_equipamento),\n    FOREIGN KEY (id_equipe) REFERENCES equipe(id_equipe)\n        ON DELETE CASCADE\n        ON UPDATE CASCADE,\n    FOREIGN KEY (id_equipamento) REFERENCES equipamento(id_equipamento)\n        ON DELETE CASCADE\n        ON UPDATE CASCADE\n) ENGINE=InnoDB;\n\n-- =====================================================\n-- TABELA USO_EQUIPAMENTO\n-- =====================================================\n\nCREATE TABLE uso_equipamento (\n    id_uso INT AUTO_INCREMENT PRIMARY KEY,\n    id_equipe INT NOT NULL,\n    id_aula INT NOT NULL,\n    horario_retirada DATETIME NOT NULL,\n    horario_devolucao DATETIME,\n    checklist_entrega TEXT,\n    checklist_devolucao TEXT,\n    observacoes TEXT,\n    FOREIGN KEY (id_equipe) REFERENCES equipe(id_equipe)\n        ON DELETE CASCADE\n        ON UPDATE CASCADE,\n    FOREIGN KEY (id_aula) REFERENCES aula(id_aula)\n        ON DELETE CASCADE\n        ON UPDATE CASCADE\n) ENGINE=InnoDB;\n\n",
+    "options": {
+        "tabSize": 4,
+        "indentSize": 4,
+        "insertSpaces": true,
+        "defaultEOL": "LF",
+        "trimAutoWhitespace": true
+    },
+    "viewState": {
+        "cursorState": [
+            {
+                "inSelectionMode": false,
+                "selectionStart": {
+                    "lineNumber": 201,
+                    "column": 1
+                },
+                "position": {
+                    "lineNumber": 201,
+                    "column": 1
+                }
+            }
+        ],
+        "viewState": {
+            "scrollLeft": 0,
+            "firstPosition": {
+                "lineNumber": 185,
+                "column": 1
+            },
+            "firstPositionDeltaTop": -2
+        },
+        "contributionsState": {
+            "editor.contrib.folding": {},
+            "editor.contrib.wordHighlighter": false
+        }
+    },
+    "contexts": [
+        {
+            "state": {
+                "start": 1,
+                "end": 1,
+                "language": "mysql",
+                "result": {
+                    "type": "text",
+                    "text": [
+                        {
+                            "type": 2,
+                            "content": "Welcome to the MySQL Shell - DB Notebook.\n\nPress Ctrl+Enter to execute the code block.\n\nExecute \\sql to switch to SQL, \\js to JavaScript and \\ts to TypeScript mode.\nExecute \\help or \\? for help;",
+                            "language": "ansi"
+                        }
+                    ]
+                },
+                "currentHeight": 28,
+                "currentSet": 1,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 6
+                        },
+                        "contentStart": 0,
+                        "state": 0
+                    }
+                ]
+            },
+            "data": []
+        },
+        {
+            "state": {
+                "start": 2,
+                "end": 201,
+                "language": "mysql",
+                "result": {
+                    "type": "text",
+                    "text": [
+                        {
+                            "type": 2,
+                            "index": 0,
+                            "resultId": "67688a92-f723-45d2-df7c-0eb3540c5717",
+                            "content": "OK, 1 row affected in 13.014ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 1,
+                            "resultId": "59a87b28-a53d-4e51-e238-59162abf4b12",
+                            "content": "OK, 0 records retrieved in 0.798ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 2,
+                            "resultId": "b26c3bc9-a503-4031-a9b4-3a71123315ad",
+                            "content": "OK, 0 records retrieved in 54.665ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 3,
+                            "resultId": "99626338-ec1c-4f6c-cc8d-f221eb26da5f",
+                            "content": "OK, 0 records retrieved in 36.283ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 4,
+                            "resultId": "df4f5b05-9694-4f22-ce1f-7ced6e08fb30",
+                            "content": "OK, 0 records retrieved in 34.782ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 5,
+                            "resultId": "732d4a4b-294f-49b8-c3fe-86f21ee2da9f",
+                            "content": "OK, 0 records retrieved in 44.02ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 6,
+                            "resultId": "f87b938b-7658-4462-ffba-67a14a046ca9",
+                            "content": "OK, 0 records retrieved in 41.258ms"
+                        }
+                    ]
+                },
+                "currentHeight": 138.65625,
+                "currentSet": 1,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 181
+                        },
+                        "contentStart": 144,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 181,
+                            "length": 26
+                        },
+                        "contentStart": 182,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 207,
+                            "length": 333
+                        },
+                        "contentStart": 367,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 540,
+                            "length": 362
+                        },
+                        "contentStart": 718,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 902,
+                            "length": 347
+                        },
+                        "contentStart": 1039,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 1249,
+                            "length": 597
+                        },
+                        "contentStart": 1381,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 1846,
+                            "length": 495
+                        },
+                        "contentStart": 1993,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 2341,
+                            "length": 447
+                        },
+                        "contentStart": 2474,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 2788,
+                            "length": 382
+                        },
+                        "contentStart": 2922,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 3170,
+                            "length": 481
+                        },
+                        "contentStart": 3315,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 3651,
+                            "length": 648
+                        },
+                        "contentStart": 3808,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 4299,
+                            "length": 617
+                        },
+                        "contentStart": 4466,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 4916,
+                            "length": 523
+                        },
+                        "contentStart": 5067,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 5439,
+                            "length": 652
+                        },
+                        "contentStart": 5582,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 6091,
+                            "length": 2
+                        },
+                        "contentStart": 6090,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": []
+        }
+    ]
+}
