@@ -1,0 +1,244 @@
+<?php
+// script de inicialização do banco de dados controle_laboratorio
+// execute este arquivo uma única vez em um ambiente com permissão para criar DBs
+
+$host = 'localhost';
+$user = 'root';
+$pass = '';
+$port = 3307;
+
+try {
+    // conecta ao servidor sem selecionar um banco
+    $pdo = new PDO("mysql:host=$host;port=$port", $user, $pass);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    // monta o SQL de criação a partir do comentário enviado pelo usuário
+    $sql = <<<'SQL'
+-- =====================================================
+-- CRIAÇÃO DO BANCO DE DADOS
+-- =====================================================
+DROP DATABASE IF EXISTS controle_laboratorio;
+CREATE DATABASE controle_laboratorio;
+USE controle_laboratorio;
+
+-- =====================================================
+-- TABELA SALA
+-- 1 Sala -> N Equipamentos
+-- =====================================================
+
+CREATE TABLE sala (
+    id_sala INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(50) NOT NULL,
+    bloco VARCHAR(30),
+    capacidade INT,
+    descricao TEXT
+) ENGINE=InnoDB;
+
+-- =====================================================
+-- TABELA TURMA
+-- 1 Turma -> N Alunos
+-- 1 Turma -> N Aulas
+-- =====================================================
+
+CREATE TABLE turma (
+    id_turma INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(50) NOT NULL,
+    curso VARCHAR(100),
+    semestre VARCHAR(20),
+    ano INT NOT NULL
+) ENGINE=InnoDB;
+
+-- =====================================================
+-- TABELA PROFESSOR
+-- =====================================================
+
+CREATE TABLE professor (
+    id_professor INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE,
+    telefone VARCHAR(20),
+    especialidade VARCHAR(100)
+) ENGINE=InnoDB;
+
+-- =====================================================
+-- TABELA AULA
+-- =====================================================
+
+CREATE TABLE aula (
+    id_aula INT AUTO_INCREMENT PRIMARY KEY,
+    tema VARCHAR(100) NOT NULL,
+    data DATE NOT NULL,
+    horario_inicio TIME NOT NULL,
+    horario_fim TIME NOT NULL,
+    id_turma INT NOT NULL,
+    id_sala INT NOT NULL,
+    FOREIGN KEY (id_turma) REFERENCES turma(id_turma)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (id_sala) REFERENCES sala(id_sala)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- =====================================================
+-- RELAÇÃO N:N PROFESSOR_AULA
+-- =====================================================
+
+CREATE TABLE professor_aula (
+    id_professor INT,
+    id_aula INT,
+    PRIMARY KEY (id_professor, id_aula),
+    FOREIGN KEY (id_professor) REFERENCES professor(id_professor)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (id_aula) REFERENCES aula(id_aula)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- =====================================================
+-- TABELA ALUNO
+-- =====================================================
+
+CREATE TABLE aluno (
+    id_aluno INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    matricula VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100),
+    id_turma INT NOT NULL,
+    FOREIGN KEY (id_turma) REFERENCES turma(id_turma)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- =====================================================
+-- TABELA EQUIPE
+-- =====================================================
+
+CREATE TABLE equipe (
+    id_equipe INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(50) NOT NULL,
+    id_turma INT NOT NULL,
+    FOREIGN KEY (id_turma) REFERENCES turma(id_turma)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- =====================================================
+-- RELAÇÃO N:N ALUNO_EQUIPE
+-- =====================================================
+
+CREATE TABLE aluno_equipe (
+    id_aluno INT,
+    id_equipe INT,
+    PRIMARY KEY (id_aluno, id_equipe),
+    FOREIGN KEY (id_aluno) REFERENCES aluno(id_aluno)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (id_equipe) REFERENCES equipe(id_equipe)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- =====================================================
+-- RESPONSÁVEL DA EQUIPE (AUTENTICAÇÃO)
+-- =====================================================
+
+CREATE TABLE responsavel_equipe (
+    id_responsavel INT AUTO_INCREMENT PRIMARY KEY,
+    id_aluno INT UNIQUE NOT NULL,
+    id_equipe INT UNIQUE NOT NULL,
+    chave_hash VARCHAR(255) NOT NULL,
+    tentativas INT DEFAULT 0,
+    bloqueado BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (id_aluno) REFERENCES aluno(id_aluno)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (id_equipe) REFERENCES equipe(id_equipe)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- =====================================================
+-- TABELA EQUIPAMENTO
+-- N Equipamentos -> 1 Sala
+-- =====================================================
+
+CREATE TABLE equipamento (
+    id_equipamento INT AUTO_INCREMENT PRIMARY KEY,
+    patrimonio VARCHAR(50) UNIQUE NOT NULL,
+    tipo ENUM('Notebook','Mouse','Carregador') NOT NULL,
+    status ENUM('Disponivel','Em Uso','Manutencao') DEFAULT 'Disponivel',
+    estado ENUM('Bom','Danificado') DEFAULT 'Bom',
+    id_sala INT NOT NULL,
+    FOREIGN KEY (id_sala) REFERENCES sala(id_sala)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- =====================================================
+-- RELAÇÃO N:N EQUIPE_EQUIPAMENTO
+-- =====================================================
+
+CREATE TABLE equipe_equipamento (
+    id_equipe INT,
+    id_equipamento INT,
+    PRIMARY KEY (id_equipe, id_equipamento),
+    FOREIGN KEY (id_equipe) REFERENCES equipe(id_equipe)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (id_equipamento) REFERENCES equipamento(id_equipamento)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- =====================================================
+-- TABELA USO_EQUIPAMENTO
+-- =====================================================
+
+CREATE TABLE uso_equipamento (
+    id_uso INT AUTO_INCREMENT PRIMARY KEY,
+    id_equipe INT NOT NULL,
+    id_aula INT NOT NULL,
+    horario_retirada DATETIME NOT NULL,
+    horario_devolucao DATETIME,
+    checklist_entrega TEXT,
+    checklist_devolucao TEXT,
+    observacoes TEXT,
+    FOREIGN KEY (id_equipe) REFERENCES equipe(id_equipe)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (id_aula) REFERENCES aula(id_aula)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE usuarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100),
+    id_acesso VARCHAR(20) UNIQUE,
+    senha VARCHAR(255),
+    tentativas INT DEFAULT 0,
+    bloqueado BOOLEAN DEFAULT FALSE
+);
+
+CREATE TABLE registros (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    equipe_id INT,
+    data_retirada DATETIME,
+    data_devolucao DATETIME,
+    danos TEXT,
+    FOREIGN KEY (equipe_id) REFERENCES usuarios(id)
+);
+SQL;
+
+    // executa todos os comandos de uma só vez
+    $pdo->exec($sql);
+    echo "Banco e tabelas criados com sucesso.\n";
+    echo "Crie um usuário inicial inserindo um registro em usuarios.\n";
+
+} catch (PDOException $e) {
+    die("Erro: " . $e->getMessage());
+}
+
+?>
