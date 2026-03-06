@@ -12,6 +12,7 @@ if (isset($_SESSION['usuario_id'])) {
     exit();
 }
 $logoControl = logo_control_lab_path();
+$adminLoginSalvo = $_COOKIE['admin_login'] ?? '';
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -35,7 +36,7 @@ $logoControl = logo_control_lab_path();
         <h1>CONTROL LAB</h1>
         <p>Sistema administrativo de controle de equipamentos</p>
         <form action="login.php" method="POST">
-            <input type="text" name="id_acesso" placeholder="Login" required>
+            <input type="text" name="id_acesso" placeholder="Login" value="<?php echo htmlspecialchars($adminLoginSalvo); ?>" required>
             <input type="password" name="senha" placeholder="Senha" required>
             <button type="submit" class="btn">Entrar</button>
         </form>
@@ -58,5 +59,4 @@ $logoControl = logo_control_lab_path();
 <script src="../js/main.js"></script>
 </body>
 </html>
-
 
