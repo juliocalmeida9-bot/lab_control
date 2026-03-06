@@ -8,7 +8,7 @@ $usuarioId = (int) $_SESSION['usuario_id'];
 $nomeDefault = $_SESSION['usuario_nome'] ?? '';
 $turmaDefault = '';
 
-$stmt = $conn->prepare("SELECT turma FROM usuarios WHERE id = :id");
+$stmt = $conn->prepare("SELECT turma FROM emprestimos WHERE usuario_id = :id ORDER BY id DESC LIMIT 1");
 $stmt->bindParam(':id', $usuarioId);
 $stmt->execute();
 $turmaDefault = $stmt->fetchColumn() ?: '';

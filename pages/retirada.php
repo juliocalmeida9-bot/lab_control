@@ -32,20 +32,7 @@ foreach ($equipamentos as $equipamento) {
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-<header class="topbar">
-    <div class="brand-block">
-        <img src="../imagens/logo-senai.png" alt="Logo SENAI" class="brand-logo small">
-        <h1>CONTROL LAB</h1>
-    </div>
-    <nav class="main-menu">
-        <a href="dashboard.php">Início</a>
-        <a href="retirada.php" class="active">Retirada</a>
-        <a href="devolucao.php">Devolução</a>
-        <a href="historico.php">Histórico</a>
-        <a href="relatorios.php">Relatórios</a>
-    </nav>
-    <div class="user-info"><span><?php echo htmlspecialchars($nome); ?></span><a href="logout.php" class="logout-btn">Sair</a></div>
-</header>
+<?php render_app_header('Retirada de Equipamentos', 'emprestimos'); ?>
 
 <main class="form-container stretch">
     <div class="card wide">

@@ -20,6 +20,23 @@ function ensure_schema(PDO $conn): void
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
+    // Add missing columns to existing databases
+    try {
+        $conn->exec("ALTER TABLE usuarios ADD COLUMN turma VARCHAR(80) DEFAULT NULL AFTER perfil");
+    } catch (PDOException $e) {
+        // Column might already exist, ignore error
+    }
+    try {
+        $conn->exec("ALTER TABLE usuarios ADD COLUMN tentativas INT DEFAULT 0 AFTER turma");
+    } catch (PDOException $e) {
+        // Column might already exist, ignore error
+    }
+    try {
+        $conn->exec("ALTER TABLE usuarios ADD COLUMN bloqueado TINYINT(1) DEFAULT 0 AFTER tentativas");
+    } catch (PDOException $e) {
+        // Column might already exist, ignore error
+    }
+
     $conn->exec("CREATE TABLE IF NOT EXISTS equipamentos (
         id INT AUTO_INCREMENT PRIMARY KEY,
         codigo_equipamento VARCHAR(40) UNIQUE NOT NULL,
@@ -27,9 +44,17 @@ function ensure_schema(PDO $conn): void
         tipo VARCHAR(60) NOT NULL,
         localizacao VARCHAR(120) DEFAULT 'Laboratório TI',
         status ENUM('Disponível','Em uso','Manutenção') DEFAULT 'Disponível',
+        estado ENUM('Bom','Danificado','Manutenção') DEFAULT 'Bom',
         observacoes TEXT DEFAULT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    // Add estado column if it doesn't exist (for existing databases)
+    try {
+        $conn->exec("ALTER TABLE equipamentos ADD COLUMN estado ENUM('Bom','Danificado','Manutenção') DEFAULT 'Bom' AFTER status");
+    } catch (PDOException $e) {
+        // Column might already exist, ignore error
+    }
 
     $conn->exec("CREATE TABLE IF NOT EXISTS emprestimos (
         id INT AUTO_INCREMENT PRIMARY KEY,

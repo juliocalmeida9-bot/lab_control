@@ -292,12 +292,12 @@ input, textarea, select {
   color: var(--senai-red);
 }
 
-.summary {
-  max-width: 800px;
-  margin: 20px auto;
-  padding: 20px;
-  background: var(--white);
-  border-radius: 10px;
+.chart-container { margin-top: 20px; }
+.chart-bar { margin-bottom: 10px; background: #f0f0f0; border-radius: 5px; overflow: hidden; }
+.chart-bar .bar { padding: 8px 12px; color: white; font-weight: bold; text-align: left; transition: width 0.3s ease; }
+.chart-bar .bar.available { background: #28a745; }
+.chart-bar .bar.in-use { background: #ffc107; color: #333; }
+.chart-bar .bar.damaged { background: #dc3545; }
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   text-align: center;
 }

@@ -24,6 +24,7 @@ $adminLoginSalvo = $_COOKIE['admin_login'] ?? '';
 <body>
 <nav class="home-nav">
     <a href="#login">Login</a>
+    <a href="#cadastro">Cadastro</a>
     <a href="#about">Sobre</a>
     <a href="#contact">Contato</a>
 </nav>
@@ -44,6 +45,30 @@ $adminLoginSalvo = $_COOKIE['admin_login'] ?? '';
         <?php if (isset($_GET['erro'])): ?><p class="erro">Credenciais inválidas.</p><?php endif; ?>
         <?php if (isset($_GET['bloqueado'])): ?><p class="erro">Usuário bloqueado.</p><?php endif; ?>
     </div>
+
+    <div class="login-card" id="cadastro" style="display: none;">
+        <div class="login-logos">
+            <img src="../imagens/logo-senai.png" alt="SENAI" class="logo senai">
+            <?php if ($logoControl): ?><img src="<?php echo htmlspecialchars($logoControl); ?>" class="logo control" alt="Control Lab"><?php else: ?><span class="control-badge">CONTROL LAB</span><?php endif; ?>
+        </div>
+        <h1>CADASTRO</h1>
+        <p>Registre-se para acessar o sistema</p>
+        <form action="create_user.php" method="POST">
+            <input type="text" name="nome" placeholder="Nome completo" required>
+            <input type="text" name="id_acesso" placeholder="ID de acesso" required>
+            <input type="password" name="senha" placeholder="Senha" required>
+            <select name="perfil" required>
+                <option value="">Selecione o perfil</option>
+                <option value="aluno">Aluno</option>
+                <option value="professor">Professor</option>
+            </select>
+            <input type="text" name="turma" placeholder="Turma/Aula" required>
+            <input type="text" name="equipe" placeholder="Equipe" required>
+            <button type="submit" class="btn">Cadastrar</button>
+        </form>
+        <?php if (isset($_GET['cadastro_sucesso'])): ?><p class="sucesso">Cadastro realizado com sucesso!</p><?php endif; ?>
+        <?php if (isset($_GET['cadastro_erro'])): ?><p class="erro">Erro no cadastro. Tente novamente.</p><?php endif; ?>
+    </div>
 </div>
 
 <section class="summary" id="about">
@@ -57,6 +82,34 @@ $adminLoginSalvo = $_COOKIE['admin_login'] ?? '';
 </section>
 
 <script src="../js/main.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const navLinks = document.querySelectorAll('.home-nav a');
+    const loginCard = document.getElementById('login');
+    const cadastroCard = document.getElementById('cadastro');
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = this.getAttribute('href').substring(1);
+
+            if (target === 'login') {
+                loginCard.style.display = 'block';
+                cadastroCard.style.display = 'none';
+            } else if (target === 'cadastro') {
+                loginCard.style.display = 'none';
+                cadastroCard.style.display = 'block';
+            }
+        });
+    });
+
+    // Check URL hash on load
+    if (window.location.hash === '#cadastro') {
+        loginCard.style.display = 'none';
+        cadastroCard.style.display = 'block';
+    }
+});
+</script>
 </body>
 </html>
 

@@ -73,23 +73,11 @@ $registro = $stmt->fetch(PDO::FETCH_ASSOC);
             </tbody>
         </table>
     </section>
+</main>
 
-<header class="topbar">
-    <div class="brand-block">
-        <img src="../imagens/logo-senai.png" alt="Logo SENAI" class="brand-logo small">
-        <h1>CONTROL LAB</h1>
-    </div>
-    <nav class="main-menu">
-        <a href="dashboard.php">Início</a>
-        <a href="retirada.php">Retirada</a>
-        <a href="devolucao.php" class="active">Devolução</a>
-        <a href="historico.php">Histórico</a>
-        <a href="relatorios.php">Relatórios</a>
-    </nav>
-    <div class="user-info"><span><?php echo htmlspecialchars($nome); ?></span><a href="logout.php" class="logout-btn">Sair</a></div>
-</header>
-
-<main class="form-container stretch">
+<script src="../js/main.js"></script>
+</body>
+</html>
     <div class="card wide">
         <h2>Registrar Devolução</h2>
 
