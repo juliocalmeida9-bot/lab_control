@@ -1,14 +1,14 @@
 <?php
 session_start();
-require_once(__DIR__ . '/../includes/config.php');
+require_once(__DIR__ . '/../includes/bootstrap.php');
+ensure_schema($conn);
 
-// Se já estiver logado, vai para dashboard
 if (isset($_SESSION['usuario_id'])) {
-    header("Location: dashboard.php");
+    header('Location: dashboard.php');
     exit();
 }
+$logoControl = logo_control_lab_path();
 ?>
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -17,30 +17,23 @@ if (isset($_SESSION['usuario_id'])) {
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-
 <div class="login-container">
     <div class="login-card">
+        <div class="login-logos">
+            <img src="../imagens/logo-senai.png" alt="SENAI" class="logo senai">
+            <?php if ($logoControl): ?><img src="<?php echo htmlspecialchars($logoControl); ?>" class="logo control" alt="Control Lab"><?php else: ?><span class="control-badge">CONTROL LAB</span><?php endif; ?>
+        </div>
         <h1>CONTROL LAB</h1>
-        <p>Sistema de Gestão de Equipamentos</p>
-
+        <p>Sistema administrativo de controle de equipamentos</p>
         <form action="login.php" method="POST">
-            <input type="text" name="id_acesso" placeholder="ID de Acesso" required>
-            <input type="password" name="senha" placeholder="Chave Secreta" required>
-            <button type="submit">Entrar</button>
+            <input type="text" name="id_acesso" placeholder="Login" required>
+            <input type="password" name="senha" placeholder="Senha" required>
+            <button type="submit" class="btn">Entrar</button>
         </form>
-
-        <?php
-        if (isset($_GET['erro'])) {
-            echo "<p class='erro'>ID ou senha inválidos!</p>";
-        }
-
-        if (isset($_GET['bloqueado'])) {
-            echo "<p class='erro'>Usuário bloqueado por tentativas inválidas.</p>";
-        }
-        ?>
+        <p class="helper-text">Admin padrão: <strong>admin</strong> / <strong>admin123</strong></p>
+        <?php if (isset($_GET['erro'])): ?><p class="erro">Credenciais inválidas.</p><?php endif; ?>
+        <?php if (isset($_GET['bloqueado'])): ?><p class="erro">Usuário bloqueado.</p><?php endif; ?>
     </div>
 </div>
-
-<script src="../js/main.js"></script>
 </body>
 </html>

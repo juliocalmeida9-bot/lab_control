@@ -1,62 +1,59 @@
 <?php
 session_start();
-require_once(__DIR__ . '/../includes/config.php');
+require_once(__DIR__ . '/../includes/layout.php');
+ensure_schema($conn);
+require_login();
 
-if (!isset($_SESSION['usuario_id'])) {
-    header("Location: index.php");
-    exit();
-}
-
-$usuario_id = $_SESSION['usuario_id'];
-$nome = $_SESSION['usuario_nome'];
-
-// buscar o último registro aberto (sem data_devolucao)
-$sql = "SELECT * FROM registros 
-        WHERE equipe_id = :equipe_id 
-          AND data_devolucao IS NULL 
-        ORDER BY data_retirada DESC LIMIT 1";
-$stmt = $conn->prepare($sql);
-$stmt->bindParam(":equipe_id", $usuario_id);
-$stmt->execute();
-$registro = $stmt->fetch(PDO::FETCH_ASSOC);
+$abertos = $conn->query("SELECT e.id, e.responsavel_nome, e.turma, e.data_retirada, eq.codigo_equipamento, eq.nome, eq.tipo
+                         FROM emprestimos e
+                         JOIN equipamentos eq ON eq.id = e.equipamento_id
+                         WHERE e.status = 'Em uso'
+                         ORDER BY e.data_retirada ASC")->fetchAll(PDO::FETCH_ASSOC);
 ?>
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Devolução - Control Lab</title>
+    <title>Devoluções - Control Lab</title>
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
+<?php render_app_header('Gestão de Devoluções', 'devolucoes'); ?>
+<main class="page-wrap">
+    <section class="card">
+        <h2>Registrar devolução por ID do empréstimo</h2>
+        <form action="processar_devolucao.php" method="POST" class="grid-form">
+            <select name="emprestimo_id" required>
+                <option value="">Selecione um empréstimo em uso</option>
+                <?php foreach ($abertos as $a): ?>
+                    <option value="<?php echo (int) $a['id']; ?>">
+                        #<?php echo (int) $a['id']; ?> | <?php echo htmlspecialchars($a['codigo_equipamento']); ?> | <?php echo htmlspecialchars($a['responsavel_nome']); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <input type="text" name="observacoes" placeholder="Observações da devolução (opcional)">
+            <button class="btn" type="submit">Confirmar devolução</button>
+        </form>
+    </section>
 
-<header class="topbar">
-    <h1>CONTROL LAB</h1>
-    <div class="user-info">
-        <span><?php echo htmlspecialchars($nome); ?></span>
-        <a href="dashboard.php" class="logout-btn">Voltar</a>
-    </div>
-</header>
-
-<main class="form-container">
-    <div class="card">
-        <h2>Registrar Devolução</h2>
-
-        <?php if ($registro): ?>
-            <form action="processar_devolucao.php" method="POST">
-                <p>Retirado em: <?php echo $registro['data_retirada']; ?></p>
-
-                <label for="danos">Danos (opcional):</label>
-                <textarea name="danos" id="danos" rows="4"></textarea>
-
-                <button type="submit" class="btn">Confirmar Devolução</button>
-            </form>
-        <?php else: ?>
-            <p>Nenhum equipamento em uso para devolução.</p>
-        <?php endif; ?>
-    </div>
+    <section class="card">
+        <h2>Equipamentos em uso</h2>
+        <table class="tabela">
+            <thead><tr><th>Empréstimo</th><th>Responsável</th><th>Turma</th><th>Equipamento</th><th>Tipo</th><th>Retirada</th></tr></thead>
+            <tbody>
+            <?php foreach ($abertos as $item): ?>
+                <tr>
+                    <td>#<?php echo (int) $item['id']; ?></td>
+                    <td><?php echo htmlspecialchars($item['responsavel_nome']); ?></td>
+                    <td><?php echo htmlspecialchars($item['turma']); ?></td>
+                    <td><?php echo htmlspecialchars($item['codigo_equipamento'] . ' - ' . $item['nome']); ?></td>
+                    <td><?php echo htmlspecialchars($item['tipo']); ?></td>
+                    <td><?php echo htmlspecialchars($item['data_retirada']); ?></td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+    </section>
 </main>
-
-<script src="../js/main.js"></script>
 </body>
 </html>
