@@ -41,7 +41,7 @@ $adminLoginSalvo = $_COOKIE['admin_login'] ?? '';
             <input type="password" name="senha" placeholder="Senha" required>
             <button type="submit" class="btn">Entrar</button>
         </form>
-        <p class="helper-text">Admin padrão: <strong>admin</strong> / <strong>admin123</strong></p>
+        
         <?php if (isset($_GET['erro'])): ?><p class="erro">Credenciais inválidas.</p><?php endif; ?>
         <?php if (isset($_GET['bloqueado'])): ?><p class="erro">Usuário bloqueado.</p><?php endif; ?>
     </div>

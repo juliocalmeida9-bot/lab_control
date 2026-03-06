@@ -56,6 +56,14 @@ try {
 
     $conn->commit();
     header('Location: devolucao.php?ok=1');
+    exit();
+} catch (Throwable $e) {
+    if ($conn->inTransaction()) {
+        $conn->rollBack();
+    }
+    header('Location: devolucao.php?erro=processamento');
+    exit();
+}
 
 $danos = trim($_POST['danos'] ?? '');
 $data_devolucao = date('Y-m-d H:i:s');
