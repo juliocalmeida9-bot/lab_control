@@ -2,7 +2,7 @@
 session_start();
 require_once(__DIR__ . '/../includes/layout.php');
 ensure_schema($conn);
-require_login();
+require_admin();
 
 $sqlBase = "SELECT e.id,
                    e.responsavel_nome,
@@ -31,20 +31,14 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     exit();
 }
 
-require_once(__DIR__ . '/../includes/bootstrap.php');
-ensure_schema($conn);
-require_login();
+$totalEmprestimos = (int) $conn->query('SELECT COUNT(*) FROM emprestimos')->fetchColumn();
+$emAndamento = (int) $conn->query("SELECT COUNT(*) FROM emprestimos WHERE status = 'Em uso'")->fetchColumn();
+$totalFinalizados = (int) $conn->query("SELECT COUNT(*) FROM emprestimos WHERE status = 'Finalizado'")->fetchColumn();
 
-$nome = $_SESSION['usuario_nome'];
-
-$totalEmprestimos = (int) $conn->query('SELECT COUNT(*) FROM registros')->fetchColumn();
-$emAndamento = (int) $conn->query('SELECT COUNT(*) FROM registros WHERE data_devolucao IS NULL')->fetchColumn();
-$totalDanificados = (int) $conn->query("SELECT COUNT(*) FROM equipamento WHERE estado = 'Danificado'")->fetchColumn();
-
-$topUsuarios = $conn->query("SELECT u.nome, COUNT(r.id) AS total
+$topUsuarios = $conn->query("SELECT u.nome, COUNT(e.id) AS total
                              FROM usuarios u
-                             LEFT JOIN registros r ON r.equipe_id = u.id
-                             GROUP BY u.id
+                             LEFT JOIN emprestimos e ON e.usuario_id = u.id
+                             GROUP BY u.id, u.nome
                              ORDER BY total DESC
                              LIMIT 5")->fetchAll(PDO::FETCH_ASSOC);
 ?>
@@ -56,8 +50,29 @@ $topUsuarios = $conn->query("SELECT u.nome, COUNT(r.id) AS total
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-<?php render_app_header('Relatórios e Exportações', 'relatorios'); ?>
+<?php render_app_header('Relatórios e Histórico de Empréstimos', 'relatorios'); ?>
 <main class="page-wrap">
+    <section class="kpi-grid">
+        <article class="card"><h2>Total de empréstimos</h2><p class="metric"><?php echo $totalEmprestimos; ?></p></article>
+        <article class="card"><h2>Em andamento</h2><p class="metric"><?php echo $emAndamento; ?></p></article>
+        <article class="card"><h2>Finalizados</h2><p class="metric"><?php echo $totalFinalizados; ?></p></article>
+    </section>
+
+    <section class="card">
+        <h2>Usuários com mais empréstimos</h2>
+        <table class="tabela compact">
+            <thead><tr><th>Usuário</th><th>Total</th></tr></thead>
+            <tbody>
+            <?php foreach ($topUsuarios as $item): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($item['nome'] ?: 'Sem nome'); ?></td>
+                    <td><?php echo (int) $item['total']; ?></td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+    </section>
+
     <section class="card">
         <div class="row-between">
             <h2>Histórico completo de empréstimos</h2>
@@ -79,45 +94,6 @@ $topUsuarios = $conn->query("SELECT u.nome, COUNT(r.id) AS total
             </tbody>
         </table>
     </section>
-        <a href="devolucao.php">Devolução</a>
-        <a href="historico.php">Histórico</a>
-        <a href="relatorios.php" class="active">Relatórios</a>
-    </nav>
-    <div class="user-info"><span><?php echo htmlspecialchars($nome); ?></span><a href="logout.php" class="logout-btn">Sair</a></div>
-</header>
-
-<main class="dashboard full">
-    <section class="card">
-        <h2>Total de empréstimos</h2>
-        <p class="metric"><?php echo $totalEmprestimos; ?></p>
-    </section>
-    <section class="card">
-        <h2>Em andamento</h2>
-        <p class="metric"><?php echo $emAndamento; ?></p>
-    </section>
-    <section class="card">
-        <h2>Equipamentos danificados</h2>
-        <p class="metric"><?php echo $totalDanificados; ?></p>
-    </section>
-    <section class="card wide-grid">
-        <h2>Usuários com mais empréstimos</h2>
-        <table class="tabela compact">
-            <thead><tr><th>Usuário</th><th>Total</th></tr></thead>
-            <tbody>
-            <?php foreach ($topUsuarios as $item): ?>
-                <tr>
-                    <td><?php echo htmlspecialchars($item['nome'] ?: 'Sem nome'); ?></td>
-                    <td><?php echo (int) $item['total']; ?></td>
-main
-                </tr>
-            <?php endforeach; ?>
-            </tbody>
-        </table>
-    </section>
 </main>
-
-<script src="../js/main.js"></script>
 </body>
 </html>
-
-
