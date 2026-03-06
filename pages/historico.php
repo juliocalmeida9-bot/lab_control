@@ -1,27 +1,25 @@
 <?php
 session_start();
-require_once(__DIR__ . '/../includes/config.php');
-
-if (!isset($_SESSION['usuario_id'])) {
-    header("Location: index.php");
-    exit();
-}
+require_once(__DIR__ . '/../includes/bootstrap.php');
+ensure_schema($conn);
+require_login();
 
 $usuario_id = $_SESSION['usuario_id'];
 $nome = $_SESSION['usuario_nome'];
 
-// Buscar registros da equipe logada
-$sql = "SELECT * FROM registros 
-        WHERE equipe_id = :equipe_id 
-        ORDER BY data_retirada DESC";
+$sql = "SELECT r.*, GROUP_CONCAT(CONCAT(e.tipo, ' #', e.id_equipamento) SEPARATOR ', ') AS itens
+        FROM registros r
+        LEFT JOIN registro_itens ri ON ri.registro_id = r.id
+        LEFT JOIN equipamento e ON e.id_equipamento = ri.equipamento_id
+        WHERE r.equipe_id = :equipe_id
+        GROUP BY r.id
+        ORDER BY r.data_retirada DESC";
 
 $stmt = $conn->prepare($sql);
-$stmt->bindParam(":equipe_id", $usuario_id);
+$stmt->bindParam(':equipe_id', $usuario_id);
 $stmt->execute();
-
 $registros = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -30,17 +28,23 @@ $registros = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-
 <header class="topbar">
-    <h1>CONTROL LAB</h1>
-    <div class="user-info">
-        <span><?php echo htmlspecialchars($nome); ?></span>
-        <a href="dashboard.php" class="logout-btn">Voltar</a>
+    <div class="brand-block">
+        <img src="../imagens/logo-senai.png" alt="Logo SENAI" class="brand-logo small">
+        <h1>CONTROL LAB</h1>
     </div>
+    <nav class="main-menu">
+        <a href="dashboard.php">Início</a>
+        <a href="retirada.php">Retirada</a>
+        <a href="devolucao.php">Devolução</a>
+        <a href="historico.php" class="active">Histórico</a>
+        <a href="relatorios.php">Relatórios</a>
+    </nav>
+    <div class="user-info"><span><?php echo htmlspecialchars($nome); ?></span><a href="logout.php" class="logout-btn">Sair</a></div>
 </header>
 
-<main class="form-container">
-    <div class="card">
+<main class="form-container stretch">
+    <div class="card wide">
         <h2>Histórico de Utilização</h2>
 
         <?php if (count($registros) > 0): ?>
@@ -49,6 +53,7 @@ $registros = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <tr>
                         <th>Data Retirada</th>
                         <th>Data Devolução</th>
+                        <th>Equipamentos (ID)</th>
                         <th>Status</th>
                         <th>Danos</th>
                     </tr>
@@ -56,28 +61,11 @@ $registros = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <tbody>
                     <?php foreach ($registros as $registro): ?>
                         <tr>
-                            <td><?php echo $registro['data_retirada']; ?></td>
-                            <td>
-                                <?php 
-                                    echo $registro['data_devolucao'] 
-                                    ? $registro['data_devolucao'] 
-                                    : "Em Uso";
-                                ?>
-                            </td>
-                            <td>
-                                <?php 
-                                    echo $registro['data_devolucao'] 
-                                    ? "Finalizado" 
-                                    : "Em Uso";
-                                ?>
-                            </td>
-                            <td>
-                                <?php 
-                                    echo $registro['danos'] 
-                                    ? htmlspecialchars($registro['danos']) 
-                                    : "-";
-                                ?>
-                            </td>
+                            <td><?php echo htmlspecialchars($registro['data_retirada']); ?></td>
+                            <td><?php echo $registro['data_devolucao'] ? htmlspecialchars($registro['data_devolucao']) : 'Em Uso'; ?></td>
+                            <td><?php echo htmlspecialchars($registro['itens'] ?: '-'); ?></td>
+                            <td><?php echo $registro['data_devolucao'] ? 'Finalizado' : 'Em Uso'; ?></td>
+                            <td><?php echo $registro['danos'] ? htmlspecialchars($registro['danos']) : '-'; ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
