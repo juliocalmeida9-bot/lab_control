@@ -79,3 +79,5 @@ $lista = $conn->query("SELECT * FROM equipamentos ORDER BY id DESC")->fetchAll(P
 </main>
 </body>
 </html>
+
+

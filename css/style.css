@@ -1,8 +1,8 @@
 :root {
- codex/improve-product-removal-features-dz7tx5
-  --senai-red: #c00021;
-  --senai-black: #181818;
-  --senai-gray: #f1f3f5;
+  --senai-red: #C8102E;
+  --senai-blue: #005CA9;
+  --senai-gray: #F1F1F1;
+  --senai-dark: #1e293b;
   --white: #fff;
   --border: #d9dde3;
 }
@@ -10,7 +10,7 @@
 body { background: var(--senai-gray); color: #222; }
 
 .app-header {
-  background: var(--senai-black);
+  background: var(--senai-dark);
   color: var(--white);
   padding: 14px 20px;
   display: grid;
@@ -22,7 +22,7 @@ body { background: var(--senai-gray); color: #222; }
   z-index: 9;
 }
 .brand-area { display:flex; align-items:center; gap:12px; }
-.logo { height: 42px; object-fit: contain; background:#fff; border-radius:6px; padding:4px; }
+.logo { height: 50px; object-fit: contain; background:#fff; border-radius:6px; padding:4px; }
 .logo.control { background: transparent; }
 .control-badge { background: var(--senai-red); color:#fff; padding:8px 10px; border-radius:6px; font-weight:700; font-size:.8rem; }
 .brand-area h1 { font-size: 1.1rem; }
@@ -66,6 +66,7 @@ input, select, textarea { width:100%; border:1px solid var(--border); border-rad
   .grid-form.two-cols { grid-template-columns: 1fr; }
 }
 
+:root {
     --senai-red: #c6152b;
     --senai-dark: #0f172a;
     --senai-light: #f8fafc;
@@ -274,6 +275,41 @@ input, textarea, select {
 
 .notification,.modal,.loader-overlay { display: none; }
 
+/* Home styles */
+.home-nav {
+  background: var(--senai-dark);
+  color: var(--white);
+  padding: 10px 20px;
+  text-align: center;
+}
+.home-nav a {
+  color: var(--white);
+  text-decoration: none;
+  margin: 0 15px;
+  font-weight: 500;
+}
+.home-nav a:hover {
+  color: var(--senai-red);
+}
+
+.summary {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  background: var(--white);
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  text-align: center;
+}
+.summary h2 {
+  color: var(--senai-red);
+  margin-bottom: 10px;
+}
+.summary p {
+  line-height: 1.6;
+  color: var(--text);
+}
+
 @media (max-width: 900px) {
     .topbar {
         grid-template-columns: 1fr;
@@ -285,4 +321,3 @@ input, textarea, select {
     .inline-form, .split-grid { grid-template-columns: 1fr; }
     .wide-grid { grid-column: span 1; }
 }
-main

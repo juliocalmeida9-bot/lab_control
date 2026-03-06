@@ -1,6 +1,5 @@
 <?php
 session_start();
- codex/improve-product-removal-features-dz7tx5
 require_once(__DIR__ . '/../includes/layout.php');
 ensure_schema($conn);
 require_login();
@@ -48,7 +47,6 @@ $topUsuarios = $conn->query("SELECT u.nome, COUNT(r.id) AS total
                              GROUP BY u.id
                              ORDER BY total DESC
                              LIMIT 5")->fetchAll(PDO::FETCH_ASSOC);
- main
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -58,7 +56,6 @@ $topUsuarios = $conn->query("SELECT u.nome, COUNT(r.id) AS total
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
- codex/improve-product-removal-features-dz7tx5
 <?php render_app_header('Relatórios e Exportações', 'relatorios'); ?>
 <main class="page-wrap">
     <section class="card">
@@ -77,15 +74,11 @@ $topUsuarios = $conn->query("SELECT u.nome, COUNT(r.id) AS total
                     <td><?php echo htmlspecialchars($r['data_retirada']); ?></td>
                     <td><?php echo htmlspecialchars($r['data_devolucao'] ?: '-'); ?></td>
                     <td><?php echo htmlspecialchars($r['status']); ?></td>
-
-<header class="topbar">
-    <div class="brand-block">
-        <img src="../imagens/logo-senai.png" alt="Logo SENAI" class="brand-logo small">
-        <h1>CONTROL LAB</h1>
-    </div>
-    <nav class="main-menu">
-        <a href="dashboard.php">Início</a>
-        <a href="retirada.php">Retirada</a>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+    </section>
         <a href="devolucao.php">Devolução</a>
         <a href="historico.php">Histórico</a>
         <a href="relatorios.php" class="active">Relatórios</a>
@@ -122,9 +115,9 @@ main
         </table>
     </section>
 </main>
- codex/improve-product-removal-features-dz7tx5
 
 <script src="../js/main.js"></script>
- main
 </body>
 </html>
+
+

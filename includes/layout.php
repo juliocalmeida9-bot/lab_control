@@ -44,3 +44,5 @@ function render_app_header(string $tituloPagina, string $active = 'dashboard'): 
     echo '</div>';
     echo '</header>';
 }
+
+

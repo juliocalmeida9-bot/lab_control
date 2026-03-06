@@ -1,5 +1,4 @@
 <?php
- codex/improve-product-removal-features-dz7tx5
 header('Location: relatorios.php');
 exit();
 
@@ -84,4 +83,5 @@ $registros = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <script src="../js/main.js"></script>
 </body>
 </html>
- main
+
+

@@ -1,5 +1,4 @@
 <?php
- codex/improve-product-removal-features-dz7tx5
 header('Location: processar_emprestimo.php');
 exit();
 
@@ -77,4 +76,5 @@ try {
     header('Location: retirada.php?erro=processamento');
     exit();
 }
- main
+
+

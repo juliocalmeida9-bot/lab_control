@@ -4,14 +4,10 @@ require_once(__DIR__ . '/../includes/bootstrap.php');
 ensure_schema($conn);
 
 if (isset($_SESSION['usuario_id'])) {
- codex/improve-product-removal-features-dz7tx5
-
     if (($_SESSION['usuario_perfil'] ?? 'usuario') === 'admin') {
         header('Location: admin.php');
         exit();
     }
-
-main
     header('Location: dashboard.php');
     exit();
 }
@@ -25,9 +21,13 @@ $logoControl = logo_control_lab_path();
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
+<nav class="home-nav">
+    <a href="#login">Login</a>
+    <a href="#about">Sobre</a>
+    <a href="#contact">Contato</a>
+</nav>
 <div class="login-container">
-    <div class="login-card">
- codex/improve-product-removal-features-dz7tx5
+    <div class="login-card" id="login">
         <div class="login-logos">
             <img src="../imagens/logo-senai.png" alt="SENAI" class="logo senai">
             <?php if ($logoControl): ?><img src="<?php echo htmlspecialchars($logoControl); ?>" class="logo control" alt="Control Lab"><?php else: ?><span class="control-badge">CONTROL LAB</span><?php endif; ?>
@@ -45,28 +45,18 @@ $logoControl = logo_control_lab_path();
     </div>
 </div>
 
-        <img src="../imagens/logo-senai.png" alt="Logo SENAI" class="brand-logo">
-        <h1>CONTROL LAB</h1>
-        <p>Sistema de Gestão de Equipamentos SENAI</p>
+<section class="summary" id="about">
+    <h2>Sobre o Control Lab</h2>
+    <p>O Control Lab é um sistema desenvolvido pelo SENAI para gerenciamento eficiente de equipamentos em laboratórios. Permite o controle de empréstimos, devoluções e manutenção de itens, garantindo organização e rastreabilidade. Desenvolvido com tecnologias modernas para facilitar o dia a dia dos usuários e administradores.</p>
+</section>
 
-        <form action="login.php" method="POST">
-            <input type="text" name="id_acesso" placeholder="ID de Acesso" required>
-            <input type="password" name="senha" placeholder="Senha" required>
-            <button type="submit">Entrar</button>
-        </form>
+<section class="summary" id="contact">
+    <h2>Contato</h2>
+    <p>Para dúvidas ou suporte, entre em contato com a equipe do SENAI através do email: suporte@senai.com.br</p>
+</section>
 
-        <p class="helper-text">Login administrador padrão: <strong>admin</strong> / <strong>admin123</strong></p>
-
-        <?php if (isset($_GET['erro'])): ?>
-            <p class="erro">ID ou senha inválidos.</p>
-        <?php endif; ?>
-
-        <?php if (isset($_GET['bloqueado'])): ?>
-            <p class="erro">Usuário bloqueado por tentativas inválidas.</p>
-        <?php endif; ?>
-    </div>
-</div>
 <script src="../js/main.js"></script>
- main
 </body>
 </html>
+
+

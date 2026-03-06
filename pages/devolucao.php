@@ -1,6 +1,5 @@
 <?php
 session_start();
- codex/improve-product-removal-features-dz7tx5
 require_once(__DIR__ . '/../includes/layout.php');
 ensure_schema($conn);
 require_login();
@@ -29,7 +28,6 @@ $stmt = $conn->prepare($sql);
 $stmt->bindParam(':equipe_id', $usuario_id);
 $stmt->execute();
 $registro = $stmt->fetch(PDO::FETCH_ASSOC);
- main
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -39,7 +37,6 @@ $registro = $stmt->fetch(PDO::FETCH_ASSOC);
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
- codex/improve-product-removal-features-dz7tx5
 <?php render_app_header('Gestão de Devoluções', 'devolucoes'); ?>
 <main class="page-wrap">
     <section class="card">
@@ -110,7 +107,8 @@ $registro = $stmt->fetch(PDO::FETCH_ASSOC);
             <p>Nenhum equipamento em uso para devolução.</p>
         <?php endif; ?>
     </div>
- main
 </main>
 </body>
 </html>
+
+

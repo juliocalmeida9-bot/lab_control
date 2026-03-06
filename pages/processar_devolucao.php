@@ -4,17 +4,14 @@ require_once(__DIR__ . '/../includes/bootstrap.php');
 ensure_schema($conn);
 require_login();
 
-codex/improve-product-removal-features-dz7tx5
 
 $usuario_id = $_SESSION['usuario_id'];
 
- main
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: devolucao.php');
     exit();
 }
 
- codex/improve-product-removal-features-dz7tx5
 $usuarioId = (int) $_SESSION['usuario_id'];
 $emprestimoId = (int) ($_POST['emprestimo_id'] ?? 0);
 $observacoes = trim($_POST['observacoes'] ?? '');
@@ -101,7 +98,6 @@ try {
 
     $conn->commit();
     header('Location: dashboard.php?ok=devolucao');
- main
     exit();
 } catch (Throwable $e) {
     if ($conn->inTransaction()) {
@@ -110,3 +106,5 @@ try {
     header('Location: devolucao.php?erro=processamento');
     exit();
 }
+
+

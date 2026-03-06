@@ -69,3 +69,5 @@ $recentes = $conn->query("SELECT e.id, e.data_retirada, u.nome as usuario, eq.co
 </main>
 </body>
 </html>
+
+

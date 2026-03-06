@@ -3,7 +3,6 @@ session_start();
 require_once(__DIR__ . '/../includes/bootstrap.php');
 ensure_schema($conn);
 
- codex/improve-product-removal-features-dz7tx5
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: index.php');
     exit();
@@ -105,4 +104,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     header('Location: index.php?erro=1');
     exit();
 }
- main
+
+

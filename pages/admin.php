@@ -1,25 +1,18 @@
 <?php
 session_start();
- codex/improve-product-removal-features-dz7tx5
+require_once(__DIR__ . '/../includes/bootstrap.php');
 require_once(__DIR__ . '/../includes/layout.php');
 ensure_schema($conn);
 require_admin();
 
 $adminId = (int) $_SESSION['usuario_id'];
-
-require_once(__DIR__ . '/../includes/bootstrap.php');
-ensure_schema($conn);
-require_admin();
-
 $nome = $_SESSION['usuario_nome'];
 $msg = '';
- main
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $acao = $_POST['acao'] ?? '';
 
     if ($acao === 'novo_usuario') {
- codex/improve-product-removal-features-dz7tx5
         $nome = trim($_POST['nome'] ?? '');
         $acesso = trim($_POST['id_acesso'] ?? '');
         $senha = trim($_POST['senha'] ?? '');
@@ -65,37 +58,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    header('Location: admin.php');
-    exit();
-}
-
-$usuarios = $conn->query("SELECT id, nome, id_acesso, perfil, turma, bloqueado FROM usuarios ORDER BY id DESC")->fetchAll(PDO::FETCH_ASSOC);
-$emUso = $conn->query("SELECT e.id, e.responsavel_nome, eq.codigo_equipamento
-                       FROM emprestimos e JOIN equipamentos eq ON eq.id = e.equipamento_id
-                       WHERE e.status = 'Em uso'")->fetchAll(PDO::FETCH_ASSOC);
-$emprestimos = $conn->query("SELECT e.id, e.responsavel_nome, e.turma, e.data_retirada, e.status, eq.codigo_equipamento
-                             FROM emprestimos e JOIN equipamentos eq ON eq.id = e.equipamento_id
-                             ORDER BY e.id DESC LIMIT 50")->fetchAll(PDO::FETCH_ASSOC);
-$eventos = $conn->query("SELECT h.created_at, h.acao, h.detalhes, u.nome
-                         FROM historico h LEFT JOIN usuarios u ON u.id = h.usuario_id
-                         ORDER BY h.id DESC LIMIT 30")->fetchAll(PDO::FETCH_ASSOC);
-
-        $nomeNovo = trim($_POST['nome'] ?? '');
-        $idAcesso = trim($_POST['id_acesso'] ?? '');
-        $senha = $_POST['senha'] ?? '';
-        $perfil = $_POST['perfil'] === 'admin' ? 'admin' : 'usuario';
-
-        if ($nomeNovo && $idAcesso && $senha) {
-            $hash = password_hash($senha, PASSWORD_DEFAULT);
-            $stmt = $conn->prepare('INSERT INTO usuarios (nome, id_acesso, senha, perfil) VALUES (:nome, :id_acesso, :senha, :perfil)');
-            $stmt->bindParam(':nome', $nomeNovo);
-            $stmt->bindParam(':id_acesso', $idAcesso);
-            $stmt->bindParam(':senha', $hash);
-            $stmt->bindParam(':perfil', $perfil);
-            $msg = $stmt->execute() ? 'Usuário cadastrado com sucesso.' : 'Erro ao cadastrar usuário.';
-        }
-    }
-
     if ($acao === 'reset_senha') {
         $usuarioId = (int) ($_POST['usuario_id'] ?? 0);
         $novaSenha = $_POST['nova_senha'] ?? '';
@@ -120,26 +82,42 @@ $eventos = $conn->query("SELECT h.created_at, h.acao, h.detalhes, u.nome
             $msg = 'Equipamento cadastrado.';
         }
     }
+
+    header('Location: admin.php');
+    exit();
 }
+
+$usuarios = $conn->query("SELECT id, nome, id_acesso, perfil, turma, bloqueado FROM usuarios ORDER BY id DESC")->fetchAll(PDO::FETCH_ASSOC);
+$emUso = $conn->query("SELECT e.id, e.responsavel_nome, eq.codigo_equipamento
+                       FROM emprestimos e JOIN equipamentos eq ON eq.id = e.equipamento_id
+                       WHERE e.status = 'Em uso'")->fetchAll(PDO::FETCH_ASSOC);
+$emprestimos = $conn->query("SELECT e.id, e.responsavel_nome, e.turma, e.data_retirada, e.status, eq.codigo_equipamento
+                             FROM emprestimos e JOIN equipamentos eq ON eq.id = e.equipamento_id
+                             ORDER BY e.id DESC LIMIT 50")->fetchAll(PDO::FETCH_ASSOC);
+$eventos = $conn->query("SELECT h.created_at, h.acao, h.detalhes, u.nome
+                         FROM historico h LEFT JOIN usuarios u ON u.id = h.usuario_id
+                         ORDER BY h.id DESC LIMIT 30")->fetchAll(PDO::FETCH_ASSOC);
 
 $usuarios = $conn->query('SELECT id, nome, id_acesso, perfil, bloqueado FROM usuarios ORDER BY id DESC')->fetchAll(PDO::FETCH_ASSOC);
 $equipamentos = $conn->query('SELECT id_equipamento, patrimonio, tipo, status, estado FROM equipamento ORDER BY id_equipamento DESC')->fetchAll(PDO::FETCH_ASSOC);
 
-$registros = $conn->query("SELECT r.id, r.data_retirada, r.data_devolucao, r.danos, u.nome,
-                          GROUP_CONCAT(CONCAT(e.tipo, ' #', e.id_equipamento) SEPARATOR ', ') AS itens
-                          FROM registros r
-                          LEFT JOIN usuarios u ON u.id = r.equipe_id
-                          LEFT JOIN registro_itens ri ON ri.registro_id = r.id
-                          LEFT JOIN equipamento e ON e.id_equipamento = ri.equipamento_id
-                          GROUP BY r.id
-                          ORDER BY r.data_retirada DESC")->fetchAll(PDO::FETCH_ASSOC);
-main
+// $registros = $conn->query("SELECT r.id, r.data_retirada, r.data_devolucao, r.danos, u.nome,
+//                           GROUP_CONCAT(CONCAT(e.tipo, ' #', e.id_equipamento) SEPARATOR ', ') AS itens
+//                           FROM registros r
+//                           LEFT JOIN usuarios u ON u.id = r.equipe_id
+//                           LEFT JOIN registro_itens ri ON ri.registro_id = r.id
+//                           LEFT JOIN equipamento e ON e.id_equipamento = ri.equipamento_id
+//                           GROUP BY r.id
+//                           ORDER BY r.data_retirada DESC")->fetchAll(PDO::FETCH_ASSOC);
+
+$eventos = $conn->query("SELECT h.created_at, h.acao, h.detalhes, u.nome
+                         FROM historico h LEFT JOIN usuarios u ON u.id = h.usuario_id
+                         ORDER BY h.id DESC LIMIT 30")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
- codex/improve-product-removal-features-dz7tx5
     <title>Administração - Control Lab</title>
     <link rel="stylesheet" href="../css/style.css">
 </head>
@@ -276,14 +254,12 @@ main
                     <td><?php echo htmlspecialchars($equipamento['tipo']); ?></td>
                     <td><?php echo htmlspecialchars($equipamento['status']); ?></td>
                     <td><?php echo htmlspecialchars($equipamento['estado']); ?></td>
- main
                 </tr>
             <?php endforeach; ?>
             </tbody>
         </table>
     </section>
 
- codex/improve-product-removal-features-dz7tx5
     <section class="card">
         <h2>Histórico de movimentações</h2>
         <table class="tabela">
@@ -313,6 +289,7 @@ main
     </section>
 </main>
 <script src="../js/main.js"></script>
- main
 </body>
 </html>
+
+

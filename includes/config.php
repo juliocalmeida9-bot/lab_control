@@ -26,3 +26,4 @@ try {
 // (não fechamos aqui pois geralmente queremos usar a mesma conexão em outras páginas)
 // $conn = null;
 ?>
+

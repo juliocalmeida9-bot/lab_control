@@ -1,5 +1,4 @@
 <?php
- codex/improve-product-removal-features-dz7tx5
 header('Location: emprestimos.php');
 exit();
 
@@ -81,4 +80,5 @@ foreach ($equipamentos as $equipamento) {
 <script src="../js/main.js"></script>
 </body>
 </html>
- main
+
+

@@ -1,9 +1,14 @@
 <?php
 session_start();
- codex/improve-product-removal-features-dz7tx5
+require_once(__DIR__ . '/../includes/bootstrap.php');
 require_once(__DIR__ . '/../includes/layout.php');
 ensure_schema($conn);
 require_login();
+
+if (($_SESSION['usuario_perfil'] ?? 'usuario') === 'admin') {
+    header('Location: admin.php');
+    exit();
+}
 
 $totalEquip = (int) $conn->query("SELECT COUNT(*) FROM equipamentos")->fetchColumn();
 $emUso = (int) $conn->query("SELECT COUNT(*) FROM equipamentos WHERE status = 'Em uso'")->fetchColumn();
@@ -14,17 +19,7 @@ $ultimos = $conn->query("SELECT e.id, e.responsavel_nome, e.turma, e.data_retira
                         ORDER BY e.data_retirada DESC
                         LIMIT 10")->fetchAll(PDO::FETCH_ASSOC);
 
-require_once(__DIR__ . '/../includes/bootstrap.php');
-ensure_schema($conn);
-require_login();
-
-if (($_SESSION['usuario_perfil'] ?? 'usuario') === 'admin') {
-    header('Location: admin.php');
-    exit();
-}
-
 $nome = $_SESSION['usuario_nome'];
- main
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -34,7 +29,6 @@ $nome = $_SESSION['usuario_nome'];
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
- codex/improve-product-removal-features-dz7tx5
 <?php render_app_header('Dashboard', 'dashboard'); ?>
 <main class="page-wrap">
     <section class="kpi-grid">
@@ -107,3 +101,5 @@ main
 </main>
 </body>
 </html>
+
+
