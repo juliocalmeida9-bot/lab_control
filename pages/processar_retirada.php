@@ -1,4 +1,8 @@
 <?php
+ codex/improve-product-removal-features-dz7tx5
+header('Location: processar_emprestimo.php');
+exit();
+
 session_start();
 require_once(__DIR__ . '/../includes/bootstrap.php');
 ensure_schema($conn);
@@ -73,3 +77,4 @@ try {
     header('Location: retirada.php?erro=processamento');
     exit();
 }
+ main

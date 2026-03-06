@@ -1,4 +1,8 @@
 <?php
+ codex/improve-product-removal-features-dz7tx5
+header('Location: emprestimos.php');
+exit();
+
 session_start();
 require_once(__DIR__ . '/../includes/bootstrap.php');
 ensure_schema($conn);
@@ -77,3 +81,4 @@ foreach ($equipamentos as $equipamento) {
 <script src="../js/main.js"></script>
 </body>
 </html>
+ main

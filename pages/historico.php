@@ -1,4 +1,8 @@
 <?php
+ codex/improve-product-removal-features-dz7tx5
+header('Location: relatorios.php');
+exit();
+
 session_start();
 require_once(__DIR__ . '/../includes/bootstrap.php');
 ensure_schema($conn);
@@ -80,3 +84,4 @@ $registros = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <script src="../js/main.js"></script>
 </body>
 </html>
+ main
