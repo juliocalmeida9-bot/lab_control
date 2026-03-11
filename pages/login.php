@@ -73,14 +73,14 @@ if (($usuario['perfil'] ?? 'usuario') === 'admin') {
 log_event($conn, 'login', (int) $usuario['id'], 'Acesso ao sistema');
 
 if (($usuario['perfil'] ?? 'usuario') === 'admin') {
-    header('Location: admin.php');
+    header('Location: home.php');
     exit();
 }
 
 if (profile_is_professor($usuario['perfil'] ?? '')) {
-    header('Location: professor.php');
+    header('Location: home.php');
     exit();
 }
 
-header('Location: dashboard.php');
+header('Location: home.php');
 exit();
