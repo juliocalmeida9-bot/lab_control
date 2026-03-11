@@ -27,10 +27,11 @@ $adminLoginSalvo = $_COOKIE['admin_login'] ?? '';
 </head>
 <body>
 <nav class="home-nav">
-    <a href="#login">Login</a>
+    <a href="#login" class="active">Login</a>
     <a href="#cadastro">Cadastro</a>
     <a href="#about">Sobre</a>
     <a href="#contact">Contato</a>
+    <button type="button" id="darkToggle" class="dark-toggle">Modo Escuro</button>
 </nav>
 <div class="login-container">
     <div class="login-card" id="login">
@@ -80,6 +81,7 @@ $adminLoginSalvo = $_COOKIE['admin_login'] ?? '';
 </div>
 
 <section class="summary" id="about">
+
     <h2>Sobre o Control Lab</h2>
     <p>O Control Lab é um sistema desenvolvido pelo SENAI para gerenciamento eficiente de equipamentos em laboratórios. Permite o controle de empréstimos, devoluções e manutenção de itens, garantindo organização e rastreabilidade. Desenvolvido com tecnologias modernas para facilitar o dia a dia dos usuários e administradores.</p>
 </section>
@@ -100,6 +102,9 @@ document.addEventListener('DOMContentLoaded', function() {
         link.addEventListener('click', function(e) {
             e.preventDefault();
             const target = this.getAttribute('href').substring(1);
+
+            navLinks.forEach(l => l.classList.remove('active'));
+            this.classList.add('active');
 
             if (target === 'login') {
                 loginCard.style.display = 'block';
@@ -135,6 +140,22 @@ document.addEventListener('DOMContentLoaded', function() {
     if (window.location.hash === '#cadastro') {
         loginCard.style.display = 'none';
         cadastroCard.style.display = 'block';
+    }
+
+    const darkToggle = document.getElementById('darkToggle');
+    if (darkToggle) {
+        function setDarkMode(enabled) {
+            document.body.classList.toggle('dark', enabled);
+            darkToggle.textContent = enabled ? 'Modo Claro' : 'Modo Escuro';
+            localStorage.setItem('claro_escuro', enabled ? 'dark' : 'light');
+        }
+
+        const stored = localStorage.getItem('claro_escuro');
+        setDarkMode(stored === 'dark');
+
+        darkToggle.addEventListener('click', function() {
+            setDarkMode(!document.body.classList.contains('dark'));
+        });
     }
 });
 </script>

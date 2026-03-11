@@ -21,8 +21,38 @@ body { background: var(--senai-gray); color: #222; }
   top: 0;
   z-index: 9;
 }
+.home-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  background: var(--senai-dark);
+  color: var(--white);
+  padding: 10px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+}
+.home-nav a {
+  color: var(--white);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+.home-nav a:hover,
+.home-nav a.active {
+  background: rgba(255,255,255, 0.2);
+}
+.logo { height: 56px; object-fit: contain; background: #fff; border-radius: 6px; padding: 4px; }
+.logo.senai { height: 56px; }
+.logo.control { background: transparent; }
+.control-badge { background: var(--senai-red); color: #fff; padding: 8px 10px; border-radius: 6px; font-weight: 700; font-size: .8rem; }
 .brand-area { display:flex; align-items:center; gap:12px; }
 .logo { height: 50px; object-fit: contain; background:#fff; border-radius:6px; padding:4px; }
+.logo.senai { height: 80px; }
 .logo.control { background: transparent; }
 .control-badge { background: var(--senai-red); color:#fff; padding:8px 10px; border-radius:6px; font-weight:700; font-size:.8rem; }
 .brand-area h1 { font-size: 1.1rem; }
@@ -277,19 +307,81 @@ input, textarea, select {
 
 /* Home styles */
 .home-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
   background: var(--senai-dark);
   color: var(--white);
-  padding: 10px 20px;
-  text-align: center;
+  padding: 12px 20px;
 }
 .home-nav a {
   color: var(--white);
   text-decoration: none;
-  margin: 0 15px;
-  font-weight: 500;
+  margin: 0 8px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all .2s ease;
 }
 .home-nav a:hover {
+  background: rgba(255,255,255,.14);
   color: var(--senai-red);
+}
+.dark-toggle {
+  background: rgba(255,255,255,.15);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.33);
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+}
+.dark-toggle:hover {
+  background: rgba(255,255,255,.30);
+}
+#about, #contact {
+  background: rgba(255,255,255,.95);
+  border: 1px solid var(--border);
+  padding: 14px;
+  border-radius: 12px;
+  margin-top: 16px;
+}
+#about h2, #contact h2 {
+  margin-bottom: 8px;
+  color: var(--senai-dark);
+}
+
+body.dark {
+  background: #020617;
+  color: #d1d5db;
+}
+body.dark .login-card,
+body.dark .card,
+body.dark .profile-card,
+body.dark #about,
+body.dark #contact {
+  background: #0f172a;
+  border-color: #334155;
+  color: #d1d5db;
+}
+body.dark .topbar,
+body.dark .home-nav,
+body.dark .top-fixed {
+  background: #020617;
+}
+body.dark input,
+body.dark select,
+body.dark textarea,
+body.dark .login-card,
+body.dark .card,
+body.dark .profile-card,
+body.dark #about,
+body.dark #contact {
+  background: #0b1120;
+  color: #fff;
+  border-color: #334155;
 }
 
 .chart-container { margin-top: 20px; }
@@ -298,9 +390,7 @@ input, textarea, select {
 .chart-bar .bar.available { background: #28a745; }
 .chart-bar .bar.in-use { background: #ffc107; color: #333; }
 .chart-bar .bar.damaged { background: #dc3545; }
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  text-align: center;
-}
+
 .summary h2 {
   color: var(--senai-red);
   margin-bottom: 10px;

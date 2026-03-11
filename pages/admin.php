@@ -6,6 +6,25 @@ require_admin();
 
 $adminId = (int) $_SESSION['usuario_id'];
 
+$searchQuery = trim($_GET['q'] ?? '');
+$searchTipo = $_GET['tipo'] ?? 'equipamento';
+$searchResults = [];
+
+if ($searchQuery !== '') {
+    if ($searchTipo === 'equipamento') {
+        $q = '%' . str_replace('%', '\\%', $searchQuery) . '%';
+        $stmt = $conn->prepare("SELECT id, codigo_equipamento AS item, nome AS extra, status AS extra2 FROM equipamentos WHERE codigo_equipamento LIKE :q OR nome LIKE :q ORDER BY id DESC LIMIT 80");
+        $stmt->execute([':q' => $q]);
+        $searchResults = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } else {
+        $perfil = $searchTipo === 'aluno' ? 'aluno' : 'professor';
+        $q = '%' . str_replace('%', '\\%', $searchQuery) . '%';
+        $stmt = $conn->prepare("SELECT id, nome AS item, id_acesso AS extra, turma AS extra2 FROM usuarios WHERE perfil = :perfil AND (nome LIKE :q OR id_acesso LIKE :q) ORDER BY id DESC LIMIT 80");
+        $stmt->execute([':perfil' => $perfil, ':q' => $q]);
+        $searchResults = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+}
+
 // Estatísticas para dashboard
 $totalEquipamentos = (int) $conn->query('SELECT COUNT(*) FROM equipamentos')->fetchColumn();
 $equipamentosDisponiveis = (int) $conn->query("SELECT COUNT(*) FROM equipamentos WHERE status = 'Disponível'")->fetchColumn();
@@ -154,7 +173,38 @@ $eventos = $conn->query("SELECT h.created_at, h.acao, h.detalhes, u.nome
 </head>
 <body>
 <?php render_app_header('Painel Administrativo', 'admin'); ?>
-<main class="page-wrap">    <section class="kpi-grid">
+<main class="page-wrap">
+    <section class="card">
+        <h2>Pesquisa administrativa</h2>
+        <form class="inline-form" method="GET" action="admin.php">
+            <input type="text" name="q" value="<?php echo htmlspecialchars($searchQuery); ?>" placeholder="Buscar..." required>
+            <select name="tipo">
+                <option value="equipamento" <?php echo $searchTipo==='equipamento' ? 'selected' : ''; ?>>Equipamento</option>
+                <option value="aluno" <?php echo $searchTipo==='aluno' ? 'selected' : ''; ?>>Aluno</option>
+                <option value="professor" <?php echo $searchTipo==='professor' ? 'selected' : ''; ?>>Professor</option>
+            </select>
+            <button type="submit" class="btn">Pesquisar</button>
+        </form>
+        <?php if ($searchQuery !== ''): ?>
+            <p class="helper-text">Resultados para "<?php echo htmlspecialchars($searchQuery); ?>" (<?php echo htmlspecialchars($searchTipo); ?>): <?php echo count($searchResults); ?></p>
+            <?php if (count($searchResults) > 0): ?>
+                <table class="tabela compact">
+                    <thead><tr><th>ID</th><th>Item</th><th>Extra</th><th>Extra2</th></tr></thead>
+                    <tbody>
+                    <?php foreach ($searchResults as $item): ?>
+                        <tr>
+                            <td><?php echo (int) $item['id']; ?></td>
+                            <td><?php echo htmlspecialchars($item['item']); ?></td>
+                            <td><?php echo htmlspecialchars($item['extra']); ?></td>
+                            <td><?php echo htmlspecialchars($item['extra2']); ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php endif; ?>
+        <?php endif; ?>
+    </section>
+    <section class="kpi-grid">
         <article class="card">
             <h2>Total de Usuários</h2>
             <p class="metric"><?php echo count($usuarios); ?></p>
