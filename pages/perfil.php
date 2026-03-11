@@ -98,6 +98,16 @@ $usuario = $dados->fetch(PDO::FETCH_ASSOC);
 
 $fotoPerfil = trim((string) ($usuario['foto_perfil'] ?? ''));
 $iniciais = strtoupper(substr((string) ($usuario['nome'] ?? 'U'), 0, 1));
+
+$stats = [
+    'emprestimos' => (int) $conn->query("SELECT COUNT(*) FROM emprestimos WHERE usuario_id = " . $usuarioId)->fetchColumn(),
+    'ativos' => (int) $conn->query("SELECT COUNT(*) FROM emprestimos WHERE usuario_id = " . $usuarioId . " AND status = 'Em uso'")->fetchColumn(),
+    'finalizados' => (int) $conn->query("SELECT COUNT(*) FROM emprestimos WHERE usuario_id = " . $usuarioId . " AND status = 'Finalizado'")->fetchColumn(),
+];
+
+$recentActivity = $conn->query("SELECT acao, detalhes, created_at FROM historico WHERE usuario_id = " . $usuarioId . " ORDER BY created_at DESC LIMIT 5")->fetchAll(PDO::FETCH_ASSOC);
+$recentLoans = $conn->query("SELECT e.data_retirada, e.status, eq.nome, eq.codigo_equipamento FROM emprestimos e JOIN equipamentos eq ON eq.id=e.equipamento_id WHERE e.usuario_id = " . $usuarioId . " ORDER BY e.id DESC LIMIT 5")->fetchAll(PDO::FETCH_ASSOC);
+$engajamento = min(100, $stats['emprestimos'] * 10);
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -109,37 +119,63 @@ $iniciais = strtoupper(substr((string) ($usuario['nome'] ?? 'U'), 0, 1));
 <body>
 <?php render_app_header('Meu Perfil', 'perfil'); ?>
 <main class="page-wrap">
-    <section class="card profile-card">
-        <div class="profile-head">
+    <section class="profile-layout">
+        <aside class="card profile-sidebar">
             <?php if ($fotoPerfil !== ''): ?>
                 <img src="<?php echo htmlspecialchars($fotoPerfil); ?>" alt="Foto de perfil" class="profile-avatar">
             <?php else: ?>
                 <div class="profile-avatar placeholder"><?php echo htmlspecialchars($iniciais); ?></div>
             <?php endif; ?>
-            <div>
-                <h2><?php echo htmlspecialchars($usuario['nome'] ?? 'Usuário'); ?></h2>
-                <p><?php echo htmlspecialchars($usuario['perfil'] ?? 'usuário'); ?> · <?php echo htmlspecialchars($usuario['id_acesso'] ?? ''); ?></p>
+            <h2><?php echo htmlspecialchars($usuario['nome'] ?? 'Usuário'); ?></h2>
+            <p class="helper-text"><?php echo htmlspecialchars($usuario['perfil'] ?? 'usuário'); ?> · <?php echo htmlspecialchars($usuario['id_acesso'] ?? ''); ?></p>
+            <p>Portal institucional de gestão de laboratórios do SENAI.</p>
+            <div class="badges"><span class="badge">SENAI</span><span class="badge">Control Lab</span><span class="badge">Ativo</span></div>
+            <p style="margin:.8rem 0 .4rem;">Progresso de uso</p>
+            <div class="progress"><span style="width: <?php echo $engajamento; ?>%"></span></div>
+            <p class="helper-text"><?php echo $engajamento; ?>% de engajamento</p>
+            <button class="btn" type="button" data-scroll="#perfilForm"><i class="bi bi-pencil-square"></i> Editar perfil</button>
+        </aside>
+
+        <section class="card">
+            <div class="kpi-grid">
+                <article class="card"><h2>Total de empréstimos</h2><p class="metric"><?php echo $stats['emprestimos']; ?></p></article>
+                <article class="card"><h2>Em uso</h2><p class="metric"><?php echo $stats['ativos']; ?></p></article>
+                <article class="card"><h2>Finalizados</h2><p class="metric"><?php echo $stats['finalizados']; ?></p></article>
             </div>
-        </div>
 
-        <?php if ($msg): ?><p class="success-message"><?php echo htmlspecialchars($msg); ?></p><?php endif; ?>
-        <?php if ($erro): ?><p class="erro"><?php echo htmlspecialchars($erro); ?></p><?php endif; ?>
+            <?php if ($msg): ?><p class="success-message"><?php echo htmlspecialchars($msg); ?></p><?php endif; ?>
+            <?php if ($erro): ?><p class="erro"><?php echo htmlspecialchars($erro); ?></p><?php endif; ?>
 
-        <form method="POST" class="grid-form profile-form" enctype="multipart/form-data">
-            <label for="email">E-mail</label>
-            <input type="email" id="email" name="email" value="<?php echo htmlspecialchars((string) ($usuario['email'] ?? '')); ?>" placeholder="seuemail@exemplo.com">
+            <h2>Atividades recentes</h2>
+            <ul class="timeline">
+                <?php foreach ($recentActivity as $event): ?>
+                    <li><strong><?php echo htmlspecialchars($event['acao']); ?></strong> — <?php echo htmlspecialchars($event['detalhes'] ?: 'Atualização de perfil'); ?> <br><small><?php echo htmlspecialchars($event['created_at']); ?></small></li>
+                <?php endforeach; ?>
+            </ul>
 
-            <label for="id_acesso">Login</label>
-            <input type="text" id="id_acesso" name="id_acesso" value="<?php echo htmlspecialchars((string) ($usuario['id_acesso'] ?? '')); ?>" placeholder="Seu login de acesso">
+            <h2>Equipamentos emprestados</h2>
+            <div class="tabela-wrap"><table class="tabela">
+                <thead><tr><th>Equipamento</th><th>Código</th><th>Status</th><th>Data</th></tr></thead>
+                <tbody>
+                    <?php foreach ($recentLoans as $loan): ?>
+                        <tr><td><?php echo htmlspecialchars($loan['nome']); ?></td><td><?php echo htmlspecialchars($loan['codigo_equipamento']); ?></td><td><?php echo htmlspecialchars($loan['status']); ?></td><td><?php echo htmlspecialchars($loan['data_retirada']); ?></td></tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table></div>
 
-            <label for="senha">Nova senha</label>
-            <input type="password" id="senha" name="senha" placeholder="Preencha apenas se quiser alterar">
-
-            <label for="foto">Foto de perfil</label>
-            <input type="file" id="foto" name="foto" accept="image/png,image/jpeg,image/webp">
-
-            <button type="submit" class="btn">Salvar perfil</button>
-        </form>
+            <h2>Editar informações</h2>
+            <form method="POST" class="grid-form profile-form" enctype="multipart/form-data" id="perfilForm">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" name="email" value="<?php echo htmlspecialchars((string) ($usuario['email'] ?? '')); ?>" placeholder="seuemail@exemplo.com">
+                <label for="id_acesso">Login</label>
+                <input type="text" id="id_acesso" name="id_acesso" value="<?php echo htmlspecialchars((string) ($usuario['id_acesso'] ?? '')); ?>" placeholder="Seu login de acesso">
+                <label for="senha">Nova senha</label>
+                <input type="password" id="senha" name="senha" placeholder="Preencha apenas se quiser alterar">
+                <label for="foto">Foto de perfil</label>
+                <input type="file" id="foto" name="foto" accept="image/png,image/jpeg,image/webp">
+                <button type="submit" class="btn">Salvar perfil</button>
+            </form>
+        </section>
     </section>
 </main>
 </body>

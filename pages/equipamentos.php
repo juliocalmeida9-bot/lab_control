@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once(__DIR__ . '/../includes/layout.php');
+require_once(__DIR__ . '/../components/tables/tables.php');
 ensure_schema($conn);
 require_admin();
 
@@ -41,8 +42,8 @@ $lista = $conn->query("SELECT * FROM equipamentos ORDER BY id DESC")->fetchAll(P
 <?php render_app_header('Cadastro de Equipamentos', 'equipamentos'); ?>
 <main class="page-wrap">
     <section class="card">
-        <h2>Novo equipamento</h2>
-        <form method="POST" class="grid-form two-cols">
+        <div class="row-between"><h2>Novo equipamento</h2><button type="button" class="btn" data-scroll="#formEquip"><i class="bi bi-plus-circle"></i> Adicionar equipamento</button></div>
+        <form method="POST" class="grid-form two-cols" id="formEquip">
             <input type="text" name="codigo_equipamento" placeholder="ID do equipamento (ex: NB-001)" required>
             <input type="text" name="nome" placeholder="Nome" required>
             <input type="text" name="tipo" placeholder="Tipo (Notebook, Mouse...)" required>
@@ -58,8 +59,9 @@ $lista = $conn->query("SELECT * FROM equipamentos ORDER BY id DESC")->fetchAll(P
     </section>
 
     <section class="card">
-        <h2>Inventário</h2>
-        <table class="tabela">
+        <div class="row-between"><h2>Inventário</h2><span class="helper-text">Filtros, busca e ordenação disponíveis.</span></div>
+        <?php render_table_tools("Buscar equipamento por código, nome ou status..."); ?>
+        <div class="tabela-wrap"><table class="tabela data-table">
             <thead><tr><th>ID</th><th>Código</th><th>Nome</th><th>Tipo</th><th>Localização</th><th>Status</th><th>Obs.</th></tr></thead>
             <tbody>
             <?php foreach ($lista as $eq): ?>
@@ -74,7 +76,7 @@ $lista = $conn->query("SELECT * FROM equipamentos ORDER BY id DESC")->fetchAll(P
                 </tr>
             <?php endforeach; ?>
             </tbody>
-        </table>
+        </table></div>
     </section>
 </main>
 </body>

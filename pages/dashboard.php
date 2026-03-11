@@ -1,6 +1,8 @@
 <?php
 session_start();
 require_once(__DIR__ . '/../includes/layout.php');
+require_once(__DIR__ . '/../components/cards/cards.php');
+require_once(__DIR__ . '/../components/tables/tables.php');
 ensure_schema($conn);
 require_login();
 
@@ -52,9 +54,10 @@ $ultimos = $conn->query("SELECT e.id, e.responsavel_nome, e.turma, e.data_retira
 <?php render_app_header('Dashboard', 'dashboard'); ?>
 <main class="page-wrap">
     <section class="kpi-grid">
-        <article class="card"><h2>Total de equipamentos</h2><p class="metric"><?php echo $totalEquip; ?></p></article>
-        <article class="card"><h2>Equipamentos em uso</h2><p class="metric"><?php echo $emUso; ?></p></article>
-        <article class="card"><h2>Equipamentos disponíveis</h2><p class="metric"><?php echo $disponiveis; ?></p></article>
+        <?php render_stat_card('Total de equipamentos', $totalEquip, 'bi-hdd-rack'); ?>
+        <?php render_stat_card('Equipamentos emprestados', $emUso, 'bi-arrow-repeat'); ?>
+        <?php render_stat_card('Equipamentos disponíveis', $disponiveis, 'bi-check-circle'); ?>
+        <?php render_stat_card('Usuários cadastrados', (int) $conn->query("SELECT COUNT(*) FROM usuarios")->fetchColumn(), 'bi-people-fill'); ?>
     </section>
 
     <section class="card">
@@ -71,7 +74,7 @@ $ultimos = $conn->query("SELECT e.id, e.responsavel_nome, e.turma, e.data_retira
         <?php if ($searchQuery !== ''): ?>
             <p class="helper-text">Resultados para "<?php echo htmlspecialchars($searchQuery); ?>" em <?php echo htmlspecialchars($searchTipo); ?>.</p>
             <?php if (count($searchResults) > 0): ?>
-                <table class="tabela compact">
+                <?php render_table_tools("Buscar resultados..."); ?><div class="tabela-wrap"><table class="tabela compact data-table">
                     <thead><tr><th>ID</th><th>Item</th><th>Detalhe</th><th>Turma/Status</th></tr></thead>
                     <tbody>
                     <?php foreach ($searchResults as $item): ?>
@@ -83,7 +86,7 @@ $ultimos = $conn->query("SELECT e.id, e.responsavel_nome, e.turma, e.data_retira
                         </tr>
                     <?php endforeach; ?>
                     </tbody>
-                </table>
+                </table></div>
             <?php else: ?>
                 <p class="helper-text">Nenhum resultado encontrado.</p>
             <?php endif; ?>
@@ -92,7 +95,7 @@ $ultimos = $conn->query("SELECT e.id, e.responsavel_nome, e.turma, e.data_retira
 
     <section class="card">
         <h2>Últimos empréstimos realizados</h2>
-        <table class="tabela">
+        <?php render_table_tools("Buscar empréstimos..."); ?><div class="tabela-wrap"><table class="tabela data-table">
             <thead><tr><th>ID</th><th>Responsável</th><th>Turma</th><th>Equipamento</th><th>Data de retirada</th></tr></thead>
             <tbody>
             <?php foreach ($ultimos as $item): ?>
@@ -105,7 +108,7 @@ $ultimos = $conn->query("SELECT e.id, e.responsavel_nome, e.turma, e.data_retira
                 </tr>
             <?php endforeach; ?>
             </tbody>
-        </table>
+        </table></div>
     </section>
 </main>
 </body>
