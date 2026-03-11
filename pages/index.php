@@ -5,14 +5,14 @@ ensure_schema($conn);
 
 if (isset($_SESSION['usuario_id'])) {
     if (($_SESSION['usuario_perfil'] ?? 'usuario') === 'admin') {
-        header('Location: admin.php');
+        header('Location: home.php');
         exit();
     }
     if (profile_is_professor($_SESSION['usuario_perfil'] ?? '')) {
-        header('Location: professor.php');
+        header('Location: home.php');
         exit();
     }
-    header('Location: dashboard.php');
+    header('Location: home.php');
     exit();
 }
 $logoControl = logo_control_lab_path();
