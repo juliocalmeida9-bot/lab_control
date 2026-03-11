@@ -11,6 +11,8 @@ function ensure_schema(PDO $conn): void
     $conn->exec("CREATE TABLE IF NOT EXISTS usuarios (
         id INT AUTO_INCREMENT PRIMARY KEY,
         nome VARCHAR(120) NOT NULL,
+        email VARCHAR(160) DEFAULT NULL,
+        foto_perfil VARCHAR(255) DEFAULT NULL,
         id_acesso VARCHAR(40) UNIQUE NOT NULL,
         senha VARCHAR(255) NOT NULL,
         perfil VARCHAR(20) DEFAULT 'usuario',
@@ -38,6 +40,16 @@ function ensure_schema(PDO $conn): void
     }
     try {
         $conn->exec("ALTER TABLE usuarios ADD COLUMN equipe VARCHAR(80) DEFAULT NULL AFTER turma");
+    } catch (PDOException $e) {
+        // Column might already exist, ignore error
+    }
+    try {
+        $conn->exec("ALTER TABLE usuarios ADD COLUMN email VARCHAR(160) DEFAULT NULL AFTER nome");
+    } catch (PDOException $e) {
+        // Column might already exist, ignore error
+    }
+    try {
+        $conn->exec("ALTER TABLE usuarios ADD COLUMN foto_perfil VARCHAR(255) DEFAULT NULL AFTER email");
     } catch (PDOException $e) {
         // Column might already exist, ignore error
     }
