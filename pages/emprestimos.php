@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once(__DIR__ . '/../includes/layout.php');
+require_once(__DIR__ . '/../components/tables/tables.php');
 ensure_schema($conn);
 require_login();
 
@@ -59,6 +60,11 @@ if ($isProfessor) {
 <body>
 <?php render_app_header('Gestão de Empréstimos', 'emprestimos'); ?>
 <main class="page-wrap">
+    <section class="kpi-grid">
+        <article class="card"><h2><i class="bi bi-journal-plus"></i> Registrar empréstimo</h2><p class="helper-text">Formalize a retirada de equipamento em segundos.</p></article>
+        <article class="card"><h2><i class="bi bi-journal-check"></i> Registrar devolução</h2><a class="btn" href="devolucao.php">Ir para devoluções</a></article>
+        <article class="card"><h2><i class="bi bi-clock-history"></i> Histórico</h2><a class="btn secondary" href="historico.php">Ver histórico</a></article>
+    </section>
     <section class="card">
         <h2>Novo empréstimo</h2>
         <form method="POST" action="processar_emprestimo.php" class="grid-form">
@@ -78,7 +84,7 @@ if ($isProfessor) {
 
     <section class="card">
         <h2>Últimos empréstimos</h2>
-        <table class="tabela">
+        <?php render_table_tools("Buscar empréstimos por responsável, item ou data..."); ?><div class="tabela-wrap"><table class="tabela data-table">
             <thead><tr><th>ID</th><th>Responsável</th><th>Equipamento</th><th>Tipo</th><th>Data</th></tr></thead>
             <tbody>
             <?php foreach ($recentes as $item): ?>
@@ -91,7 +97,7 @@ if ($isProfessor) {
                 </tr>
             <?php endforeach; ?>
             </tbody>
-        </table>
+        </table></div>
     </section>
 </main>
 </body>

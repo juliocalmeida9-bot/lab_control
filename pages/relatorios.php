@@ -1,6 +1,8 @@
 <?php
 session_start();
 require_once(__DIR__ . '/../includes/layout.php');
+require_once(__DIR__ . '/../components/cards/cards.php');
+require_once(__DIR__ . '/../components/tables/tables.php');
 ensure_schema($conn);
 require_admin();
 
@@ -53,14 +55,25 @@ $topUsuarios = $conn->query("SELECT u.nome, COUNT(e.id) AS total
 <?php render_app_header('Relatórios e Histórico de Empréstimos', 'relatorios'); ?>
 <main class="page-wrap">
     <section class="kpi-grid">
-        <article class="card"><h2>Total de empréstimos</h2><p class="metric"><?php echo $totalEmprestimos; ?></p></article>
-        <article class="card"><h2>Em andamento</h2><p class="metric"><?php echo $emAndamento; ?></p></article>
-        <article class="card"><h2>Finalizados</h2><p class="metric"><?php echo $totalFinalizados; ?></p></article>
+        <?php render_stat_card("Total de empréstimos", $totalEmprestimos, "bi-collection"); ?>
+        <?php render_stat_card("Em andamento", $emAndamento, "bi-hourglass-split"); ?>
+        <?php render_stat_card("Finalizados", $totalFinalizados, "bi-check2-square"); ?>
+    </section>
+
+    <section class="card">
+        <div class="row-between">
+            <h2>Exportações e gráficos</h2>
+            <div class="row-between">
+                <button class="btn" type="button" data-export="pdf"><i class="bi bi-filetype-pdf"></i> Exportar PDF</button>
+                <a class="btn secondary" href="relatorios.php?export=csv"><i class="bi bi-file-earmark-excel"></i> Exportar Excel</a>
+            </div>
+        </div>
+        <p class="helper-text">Painel com indicadores para suporte gerencial e auditoria.</p>
     </section>
 
     <section class="card">
         <h2>Usuários com mais empréstimos</h2>
-        <table class="tabela compact">
+        <?php render_table_tools("Buscar usuário..."); ?><div class="tabela-wrap"><table class="tabela compact data-table">
             <thead><tr><th>Usuário</th><th>Total</th></tr></thead>
             <tbody>
             <?php foreach ($topUsuarios as $item): ?>
@@ -70,7 +83,7 @@ $topUsuarios = $conn->query("SELECT u.nome, COUNT(e.id) AS total
                 </tr>
             <?php endforeach; ?>
             </tbody>
-        </table>
+        </table></div>
     </section>
 
     <section class="card">
@@ -78,7 +91,7 @@ $topUsuarios = $conn->query("SELECT u.nome, COUNT(e.id) AS total
             <h2>Histórico completo de empréstimos</h2>
             <a class="btn" href="relatorios.php?export=csv">Exportar CSV</a>
         </div>
-        <table class="tabela">
+        <?php render_table_tools("Buscar no histórico..."); ?><div class="tabela-wrap"><table class="tabela data-table">
             <thead><tr><th>Responsável</th><th>ID Equip.</th><th>Equipamento</th><th>Retirada</th><th>Devolução</th><th>Status</th></tr></thead>
             <tbody>
             <?php foreach ($rows as $r): ?>
@@ -92,7 +105,7 @@ $topUsuarios = $conn->query("SELECT u.nome, COUNT(e.id) AS total
                 </tr>
             <?php endforeach; ?>
             </tbody>
-        </table>
+        </table></div>
     </section>
 </main>
 </body>
