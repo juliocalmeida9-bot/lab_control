@@ -14,6 +14,14 @@ $responsavel = trim($_POST['responsavel_nome'] ?? '');
 $turma = trim($_POST['turma'] ?? '');
 $equipamentoId = (int) ($_POST['equipamento_id'] ?? 0);
 
+
+$perfilUsuario = $_SESSION['usuario_perfil'] ?? 'usuario';
+$turmaSessao = trim((string) ($_SESSION['usuario_turma'] ?? ''));
+$isProfessor = profile_is_professor($perfilUsuario);
+if ($isProfessor) {
+    $turma = $turmaSessao;
+}
+
 if ($responsavel === '' || $turma === '' || $equipamentoId <= 0) {
     header('Location: emprestimos.php?erro=campos');
     exit();
@@ -22,13 +30,18 @@ if ($responsavel === '' || $turma === '' || $equipamentoId <= 0) {
 try {
     $conn->beginTransaction();
 
-    $eqStmt = $conn->prepare("SELECT id, codigo_equipamento, status FROM equipamentos WHERE id = :id FOR UPDATE");
+    $eqStmt = $conn->prepare("SELECT id, codigo_equipamento, status, localizacao FROM equipamentos WHERE id = :id FOR UPDATE");
     $eqStmt->bindParam(':id', $equipamentoId);
     $eqStmt->execute();
     $equipamento = $eqStmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$equipamento || $equipamento['status'] !== 'Disponível') {
         throw new RuntimeException('Equipamento indisponível.');
+    }
+
+
+    if ($isProfessor && $equipamento['localizacao'] !== $turmaSessao) {
+        throw new RuntimeException('Professor só pode retirar equipamento da própria sala/turma.');
     }
 
     $data = date('Y-m-d H:i:s');

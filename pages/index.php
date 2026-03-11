@@ -8,6 +8,10 @@ if (isset($_SESSION['usuario_id'])) {
         header('Location: admin.php');
         exit();
     }
+    if (profile_is_professor($_SESSION['usuario_perfil'] ?? '')) {
+        header('Location: professor.php');
+        exit();
+    }
     header('Location: dashboard.php');
     exit();
 }
@@ -39,10 +43,12 @@ $adminLoginSalvo = $_COOKIE['admin_login'] ?? '';
         <form action="login.php" method="POST">
             <input type="text" name="id_acesso" placeholder="Login" value="<?php echo htmlspecialchars($adminLoginSalvo); ?>" required>
             <input type="password" name="senha" placeholder="Senha" required>
+            <input type="text" name="turma" placeholder="Turma (obrigatória para professor)">
             <button type="submit" class="btn">Entrar</button>
         </form>
         
-        <?php if (isset($_GET['erro'])): ?><p class="erro">Credenciais inválidas.</p><?php endif; ?>
+        <?php if (isset($_GET['erro']) && $_GET['erro'] !== 'turma'): ?><p class="erro">Credenciais inválidas.</p><?php endif; ?>
+        <?php if (isset($_GET['erro']) && $_GET['erro'] === 'turma'): ?><p class="erro">Professor: selecione uma turma válida para entrar.</p><?php endif; ?>
         <?php if (isset($_GET['bloqueado'])): ?><p class="erro">Usuário bloqueado.</p><?php endif; ?>
     </div>
 
@@ -57,17 +63,19 @@ $adminLoginSalvo = $_COOKIE['admin_login'] ?? '';
             <input type="text" name="nome" placeholder="Nome completo" required>
             <input type="text" name="id_acesso" placeholder="ID de acesso" required>
             <input type="password" name="senha" placeholder="Senha" required>
-            <select name="perfil" required>
+            <select name="perfil" id="perfilSelect" required>
                 <option value="">Selecione o perfil</option>
                 <option value="aluno">Aluno</option>
                 <option value="professor">Professor</option>
             </select>
+            <input type="password" name="chave_professor" id="chaveProfessor" placeholder="Chave de acesso do professor" style="display: none;">
             <input type="text" name="turma" placeholder="Turma/Aula" required>
             <input type="text" name="equipe" placeholder="Equipe" required>
             <button type="submit" class="btn">Cadastrar</button>
         </form>
         <?php if (isset($_GET['cadastro_sucesso'])): ?><p class="sucesso">Cadastro realizado com sucesso!</p><?php endif; ?>
-        <?php if (isset($_GET['cadastro_erro'])): ?><p class="erro">Erro no cadastro. Tente novamente.</p><?php endif; ?>
+        <?php if (isset($_GET['cadastro_erro']) && $_GET['cadastro_erro'] === 'chave'): ?><p class="erro">Chave de professor inválida.</p><?php endif; ?>
+        <?php if (isset($_GET['cadastro_erro']) && $_GET['cadastro_erro'] !== 'chave'): ?><p class="erro">Erro no cadastro. Tente novamente.</p><?php endif; ?>
     </div>
 </div>
 
@@ -102,6 +110,26 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    const perfilSelect = document.getElementById('perfilSelect');
+    const chaveProfessor = document.getElementById('chaveProfessor');
+
+    function toggleProfessorKey() {
+        const isProfessor = perfilSelect && perfilSelect.value === 'professor';
+        if (!chaveProfessor) {
+            return;
+        }
+        chaveProfessor.style.display = isProfessor ? 'block' : 'none';
+        chaveProfessor.required = isProfessor;
+        if (!isProfessor) {
+            chaveProfessor.value = '';
+        }
+    }
+
+    if (perfilSelect) {
+        perfilSelect.addEventListener('change', toggleProfessorKey);
+        toggleProfessorKey();
+    }
 
     // Check URL hash on load
     if (window.location.hash === '#cadastro') {

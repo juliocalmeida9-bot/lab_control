@@ -14,6 +14,7 @@ function render_app_header(string $tituloPagina, string $active = 'dashboard'): 
         'relatorios' => ['Relatórios', 'relatorios.php'],
         'historico' => ['Histórico de Eventos', 'historico.php'],
         'equipamentos' => ['Equipamentos', 'equipamentos.php'],
+        'professor' => ['Painel do Professor', 'professor.php'],
         'admin' => ['Administração', 'admin.php'],
         'perfil' => ['Perfil do Administrador', 'perfil_admin.php']
     ];
@@ -32,6 +33,12 @@ function render_app_header(string $tituloPagina, string $active = 'dashboard'): 
     echo '<nav class="top-nav">';
     foreach ($menu as $key => $item) {
         if (($key === 'admin' || $key === 'perfil' || $key === 'equipamentos' || $key === 'relatorios' || $key === 'historico') && $perfil !== 'admin') {
+            continue;
+        }
+        if ($key === 'professor' && !profile_is_professor($perfil)) {
+            continue;
+        }
+        if (profile_is_professor($perfil) && in_array($key, ['dashboard', 'devolucoes', 'relatorios', 'historico', 'equipamentos', 'admin', 'perfil'], true)) {
             continue;
         }
         $class = $active === $key ? 'active' : '';
