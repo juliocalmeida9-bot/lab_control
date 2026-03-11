@@ -10,6 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $id = trim($_POST['id_acesso'] ?? '');
 $senha = $_POST['senha'] ?? '';
+$turmaSelecionada = trim($_POST['turma'] ?? '');
 
 $stmt = $conn->prepare("SELECT * FROM usuarios WHERE id_acesso = :id_acesso");
 $stmt->bindParam(':id_acesso', $id);
@@ -35,6 +36,15 @@ if ((int) $usuario['bloqueado'] === 1) {
     exit();
 }
 
+
+if (profile_is_professor($usuario['perfil'] ?? '')) {
+    $turmasProfessor = array_filter(array_map('trim', explode(',', (string) ($usuario['turma'] ?? ''))));
+    if (!$turmaSelecionada || !in_array($turmaSelecionada, $turmasProfessor, true)) {
+        header('Location: index.php?erro=turma');
+        exit();
+    }
+}
+
 $reset = $conn->prepare("UPDATE usuarios SET tentativas = 0 WHERE id = :id");
 $reset->bindParam(':id', $usuario['id']);
 $reset->execute();
@@ -42,6 +52,16 @@ $reset->execute();
 $_SESSION['usuario_id'] = $usuario['id'];
 $_SESSION['usuario_nome'] = $usuario['nome'];
 $_SESSION['usuario_perfil'] = $usuario['perfil'];
+$_SESSION['usuario_turma'] = $turmaSelecionada !== '' ? $turmaSelecionada : ($usuario['turma'] ?? '');
+
+if (profile_is_professor($usuario['perfil'] ?? '')) {
+    $registroSessao = $conn->prepare("INSERT INTO professor_sessoes (professor_id, turma_selecionada, created_at) VALUES (:professor_id, :turma_selecionada, :created_at)");
+    $now = date('Y-m-d H:i:s');
+    $registroSessao->bindParam(':professor_id', $usuario['id']);
+    $registroSessao->bindParam(':turma_selecionada', $_SESSION['usuario_turma']);
+    $registroSessao->bindParam(':created_at', $now);
+    $registroSessao->execute();
+}
 
 if (($usuario['perfil'] ?? 'usuario') === 'admin') {
     $_SESSION['admin_login_salvo'] = $usuario['id_acesso'];
@@ -54,6 +74,11 @@ log_event($conn, 'login', (int) $usuario['id'], 'Acesso ao sistema');
 
 if (($usuario['perfil'] ?? 'usuario') === 'admin') {
     header('Location: admin.php');
+    exit();
+}
+
+if (profile_is_professor($usuario['perfil'] ?? '')) {
+    header('Location: professor.php');
     exit();
 }
 

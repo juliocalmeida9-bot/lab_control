@@ -8,6 +8,10 @@ if (($_SESSION['usuario_perfil'] ?? 'usuario') === 'admin') {
     header('Location: admin.php');
     exit();
 }
+if (profile_is_professor($_SESSION['usuario_perfil'] ?? '')) {
+    header('Location: professor.php');
+    exit();
+}
 
 $totalEquip = (int) $conn->query("SELECT COUNT(*) FROM equipamentos")->fetchColumn();
 $emUso = (int) $conn->query("SELECT COUNT(*) FROM equipamentos WHERE status = 'Em uso'")->fetchColumn();

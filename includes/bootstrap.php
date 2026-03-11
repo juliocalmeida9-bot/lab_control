@@ -13,7 +13,7 @@ function ensure_schema(PDO $conn): void
         nome VARCHAR(120) NOT NULL,
         id_acesso VARCHAR(40) UNIQUE NOT NULL,
         senha VARCHAR(255) NOT NULL,
-        perfil ENUM('admin','usuario') DEFAULT 'usuario',
+        perfil VARCHAR(20) DEFAULT 'usuario',
         turma VARCHAR(80) DEFAULT NULL,
         tentativas INT DEFAULT 0,
         bloqueado TINYINT(1) DEFAULT 0,
@@ -33,6 +33,11 @@ function ensure_schema(PDO $conn): void
     }
     try {
         $conn->exec("ALTER TABLE usuarios ADD COLUMN bloqueado TINYINT(1) DEFAULT 0 AFTER tentativas");
+    } catch (PDOException $e) {
+        // Column might already exist, ignore error
+    }
+    try {
+        $conn->exec("ALTER TABLE usuarios ADD COLUMN equipe VARCHAR(80) DEFAULT NULL AFTER turma");
     } catch (PDOException $e) {
         // Column might already exist, ignore error
     }
@@ -86,6 +91,14 @@ function ensure_schema(PDO $conn): void
         FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
+    $conn->exec("CREATE TABLE IF NOT EXISTS professor_sessoes (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        professor_id INT NOT NULL,
+        turma_selecionada VARCHAR(80) NOT NULL,
+        created_at DATETIME NOT NULL,
+        FOREIGN KEY (professor_id) REFERENCES usuarios(id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
     // Migração básica para base antiga
     $oldTable = $conn->query("SHOW TABLES LIKE 'equipamento'")->fetchColumn();
     if ($oldTable) {
@@ -125,6 +138,17 @@ function ensure_schema(PDO $conn): void
     }
 
     $done = true;
+}
+
+function professor_access_key(): string
+{
+    $key = getenv('PROFESSOR_ACCESS_KEY');
+    return $key !== false && $key !== '' ? $key : 'SENAI-PROF';
+}
+
+function profile_is_professor(?string $perfil): bool
+{
+    return strtolower((string) $perfil) === 'professor';
 }
 
 function log_event(PDO $conn, string $acao, ?int $usuarioId, string $detalhes = ''): void
