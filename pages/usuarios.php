@@ -11,11 +11,23 @@ $usuarios = $conn->query("SELECT nome, id_acesso, perfil, turma FROM usuarios OR
 include(__DIR__ . '/../includes/header.php');
 include(__DIR__ . '/../includes/sidebar.php');
 ?>
-<section class="page-heading"><h1>Usuários</h1></section>
-<div class="table-card">
-<table>
-<thead><tr><th>Nome</th><th>ID acesso</th><th>Perfil</th><th>Turma</th></tr></thead>
-<tbody><?php foreach ($usuarios as $u): ?><tr><td><?php echo htmlspecialchars($u['nome']); ?></td><td><?php echo htmlspecialchars($u['id_acesso']); ?></td><td><?php echo htmlspecialchars($u['perfil']); ?></td><td><?php echo htmlspecialchars($u['turma'] ?? '-'); ?></td></tr><?php endforeach; ?></tbody>
-</table>
-</div>
+<section class="page-heading">
+    <h1>Gerenciamento de usuários do sistema</h1>
+    <p>Administração de acessos por perfil institucional.</p>
+</section>
+<section class="card table-card">
+    <div class="table-wrap"><table>
+        <thead><tr><th>Nome</th><th>Email</th><th>Tipo de usuário</th><th>Ações</th></tr></thead>
+        <tbody>
+            <?php foreach ($usuarios as $u): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($u['nome']); ?></td>
+                    <td><?php echo htmlspecialchars($u['id_acesso']); ?></td>
+                    <td><?php echo ucfirst(htmlspecialchars($u['perfil'])); ?></td>
+                    <td><button class="btn btn-light" type="button">Editar</button> <button class="btn btn-light" type="button">Excluir</button> <button class="btn btn-light" type="button">Redefinir senha</button></td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table></div>
+</section>
 <?php include(__DIR__ . '/../includes/footer.php'); ?>

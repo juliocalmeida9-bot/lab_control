@@ -6,43 +6,49 @@ require_auth();
 
 $pageTitle = 'Empréstimos';
 $currentPage = 'emprestimos.php';
-$role = current_user_role();
 
-if ($role === 'admin') {
-    $stmt = $conn->query("SELECT e.id, u.nome AS usuario, eq.nome AS equipamento, e.data_retirada, e.status
-        FROM emprestimos e
-        JOIN usuarios u ON u.id = e.usuario_id
-        JOIN equipamentos eq ON eq.id = e.equipamento_id
-        ORDER BY e.id DESC LIMIT 50");
-    $emprestimos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} else {
-    $stmt = $conn->prepare("SELECT e.id, eq.nome AS equipamento, e.data_retirada, e.status
-        FROM emprestimos e
-        JOIN equipamentos eq ON eq.id = e.equipamento_id
-        WHERE e.usuario_id = :usuario_id
-        ORDER BY e.id DESC LIMIT 50");
-    $stmt->execute([':usuario_id' => (int) $_SESSION['usuario_id']]);
-    $emprestimos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
+$historico = $conn->query("SELECT e.id, e.responsavel_nome AS aluno, eq.nome AS equipamento, e.turma, e.data_retirada, e.data_devolucao, e.status
+    FROM emprestimos e
+    JOIN equipamentos eq ON eq.id = e.equipamento_id
+    ORDER BY e.id DESC LIMIT 100")->fetchAll(PDO::FETCH_ASSOC);
 
 include(__DIR__ . '/../includes/header.php');
 include(__DIR__ . '/../includes/sidebar.php');
 ?>
-<section class="page-heading"><h1>Empréstimos</h1></section>
-<div class="table-card">
-<table>
-<thead><tr><th>ID</th><?php if ($role === 'admin'): ?><th>Usuário</th><?php endif; ?><th>Equipamento</th><th>Data</th><th>Status</th></tr></thead>
-<tbody>
-<?php foreach ($emprestimos as $em): ?>
-<tr>
-<td>#<?php echo (int) $em['id']; ?></td>
-<?php if ($role === 'admin'): ?><td><?php echo htmlspecialchars($em['usuario']); ?></td><?php endif; ?>
-<td><?php echo htmlspecialchars($em['equipamento']); ?></td>
-<td><?php echo htmlspecialchars($em['data_retirada']); ?></td>
-<td><?php echo htmlspecialchars($em['status']); ?></td>
-</tr>
-<?php endforeach; ?>
-</tbody>
-</table>
-</div>
+<section class="row-between page-heading">
+    <div><h1>Controle de Empréstimos</h1><p>Registro e acompanhamento de retiradas e devoluções.</p></div>
+    <a href="retirada.php" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Novo empréstimo</a>
+</section>
+
+<section class="card" style="margin-top:16px;">
+    <h3>Novo empréstimo</h3>
+    <form class="controls" action="processar_emprestimo.php" method="POST">
+        <input name="aluno" placeholder="Aluno">
+        <input name="equipamento" placeholder="Equipamento">
+        <input name="professor" placeholder="Professor responsável">
+        <input name="turma" placeholder="Turma">
+        <input name="data_emprestimo" type="date">
+        <input name="data_devolucao_prevista" type="date">
+        <button class="btn btn-secondary" type="submit">Registrar</button>
+    </form>
+</section>
+
+<section class="card table-card">
+    <h3>Histórico de empréstimos</h3>
+    <div class="table-wrap"><table>
+        <thead><tr><th>Aluno</th><th>Equipamento</th><th>Turma</th><th>Data retirada</th><th>Data devolução</th><th>Status</th></tr></thead>
+        <tbody>
+        <?php foreach ($historico as $h): ?>
+            <tr>
+                <td><?php echo htmlspecialchars($h['aluno']); ?></td>
+                <td><?php echo htmlspecialchars($h['equipamento']); ?></td>
+                <td><?php echo htmlspecialchars($h['turma']); ?></td>
+                <td><?php echo htmlspecialchars($h['data_retirada']); ?></td>
+                <td><?php echo htmlspecialchars($h['data_devolucao'] ?: '-'); ?></td>
+                <td><?php echo htmlspecialchars($h['status']); ?></td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table></div>
+</section>
 <?php include(__DIR__ . '/../includes/footer.php'); ?>
